@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { SearchProvider } from './context/SearchContext';
 import Nav from "./componenets/nav/nav.jsx";
 import SearchBar from "./SearchBar/searchBar.jsx";
 import "bootstrap/dist/css/bootstrap.css"
@@ -10,18 +11,20 @@ import PokemonDetail from "./pages/PokemonDetail/PokemonDetail.jsx";
 
 const App = () => {
     return (
-        <div>
-            <Nav />
-            <Routes>
-                <Route path="/" element={
-                    <>
-                        <SearchBar />
-                        <Categories />
-                    </>
-                } />
-                <Route path="/pokemon/:name" element={<PokemonDetail />} />
-            </Routes>
-        </div>
+        <SearchProvider>
+            <div>
+                <Nav/>
+                <Routes>
+                    <Route path="/" element={
+                        <>
+                            <SearchBar/>
+                            <Categories/>
+                        </>
+                    } />
+                    <Route path="/pokemon/:name" element={<PokemonDetail />} />
+                </Routes>
+            </div>
+        </SearchProvider>
     );
 };
 

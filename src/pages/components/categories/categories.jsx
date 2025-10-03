@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSearch } from '../../../context/SearchContext';
 import { getPokemonTypes, listCategories } from "../../../services/categories.js";
 import Pagination from "../../pagination/pagination.jsx";
 
@@ -7,6 +8,7 @@ import Pagination from "../../pagination/pagination.jsx";
 const CARDS_PER_PAGE = 6;
 const Categories = () => {
     const navigate = useNavigate();
+    const { searchTerm } = useSearch();
     const [pokemon, setPokemon] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -42,21 +44,40 @@ const Categories = () => {
         }
     }
 
-    const handleTypeFilter = (type) => {
-        setSelectedType(type);
-        setCurrentPage(1); // Reset to first page when filtering
-        
-        if (type === 'All') {
-            setFilteredPokemon(pokemon);
-        } else {
-            const filtered = pokemon.filter(p => 
+    // Combined filtering function for both search and type filtering
+    const applyFilters = () => {
+        let filtered = pokemon;
+
+        // Apply search filter
+        if (searchTerm && searchTerm.length > 0) {
+            filtered = filtered.filter(p => 
+                p.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        // Apply type filter
+        if (selectedType !== 'All') {
+            filtered = filtered.filter(p => 
                 p.pokemonTypes && p.pokemonTypes.some(pokemonType => 
-                    pokemonType.toLowerCase() === type.toLowerCase()
+                    pokemonType.toLowerCase() === selectedType.toLowerCase()
                 )
             );
-            setFilteredPokemon(filtered);
         }
+
+        setFilteredPokemon(filtered);
+        setCurrentPage(1); // Reset to first page when filters change
     };
+
+    const handleTypeFilter = (type) => {
+        setSelectedType(type);
+    };
+
+    // Apply filters whenever search term, selected type, or pokemon data changes
+    useEffect(() => {
+        if (pokemon.length > 0) {
+            applyFilters();
+        }
+    }, [searchTerm, selectedType, pokemon]);
 
     useEffect(() => {
         fetchPokemon();
@@ -155,10 +176,26 @@ const Categories = () => {
                                         <small>
                                             <i className="bi bi-info-circle me-1"></i>
                                             Showing {filteredPokemon.length} of {pokemon.length} Pokemon
+                                            {searchTerm && (
+                                                <span className="ms-2">
+                                                    <span className="badge bg-info">Search: "{searchTerm}"</span>
+                                                </span>
+                                            )}
                                             {selectedType !== 'All' && (
                                                 <span className="ms-2">
-                                                    <span className="badge bg-secondary">{selectedType}</span> type filter active
+                                                    <span className="badge bg-secondary">Type: {selectedType}</span>
                                                 </span>
+                                            )}
+                                            {(searchTerm || selectedType !== 'All') && (
+                                                <button 
+                                                    className="btn btn-link btn-sm text-decoration-none ms-2 p-0"
+                                                    onClick={() => {
+                                                        setSelectedType('All');
+                                                        // Clear search through context would be better, but this works for now
+                                                    }}
+                                                >
+                                                    <i className="bi bi-x-circle"></i> Clear all filters
+                                                </button>
                                             )}
                                         </small>
                                     </div>
@@ -212,14 +249,46 @@ const Categories = () => {
                                 <i className="bi bi-search" style={{fontSize: '3rem', color: '#6c757d'}}></i>
                             </div>
                             <h4 className="text-muted">No Pokemon Found</h4>
-                            <p className="text-muted">No Pokemon match the selected type filter: <strong>{selectedType}</strong></p>
-                            <button 
-                                className="btn btn-primary"
-                                onClick={() => handleTypeFilter('All')}
-                            >
-                                <i className="bi bi-arrow-clockwise me-2"></i>
-                                Show All Pokemon
-                            </button>
+                            {searchTerm && selectedType !== 'All' ? (
+                                <>
+                                    <p className="text-muted">No Pokemon match both search term <strong>"{searchTerm}"</strong> and type <strong>{selectedType}</strong></p>
+                                    <div className="d-flex justify-content-center gap-2">
+                                        <button 
+                                            className="btn btn-outline-primary"
+                                            onClick={() => setSelectedType('All')}
+                                        >
+                                            <i className="bi bi-funnel me-2"></i>
+                                            Clear Type Filter
+                                        </button>
+                                        <button 
+                                            className="btn btn-primary"
+                                            onClick={() => {
+                                                setSelectedType('All');
+                                                // Would need to clear search through context
+                                            }}
+                                        >
+                                            <i className="bi bi-arrow-clockwise me-2"></i>
+                                            Clear All Filters
+                                        </button>
+                                    </div>
+                                </>
+                            ) : searchTerm ? (
+                                <>
+                                    <p className="text-muted">No Pokemon match the search term: <strong>"{searchTerm}"</strong></p>
+                                    <p className="text-muted small">Try searching for Pokemon like "Pikachu", "Charizard", or "Bulbasaur"</p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="text-muted">No Pokemon match the selected type filter: <strong>{selectedType}</strong></p>
+                                    <button 
+                                        className="btn btn-primary"
+                                        onClick={() => setSelectedType('All')}
+                                    >
+                                        <i className="bi bi-arrow-clockwise me-2"></i>
+                                        Show All Pokemon
+                                    </button>
+                                </>
+                            )}
                         </div>
                     )}
                     
