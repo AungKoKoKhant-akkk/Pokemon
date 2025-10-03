@@ -1,15 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useFavorites } from '../../context/FavoritesContext';
 import axios from 'axios';
 
 const PokemonDetail = () => {
     const { name } = useParams();
     const navigate = useNavigate();
+    const { toggleFavorite, isFavorite } = useFavorites();
     const [pokemon, setPokemon] = useState(null);
     const [species, setSpecies] = useState(null);
     const [evolutionChain, setEvolutionChain] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [favoriteActionFeedback, setFavoriteActionFeedback] = useState(null);
+
+    // Handle favorite toggle with feedback
+    const handleFavoriteToggle = () => {
+        if (!pokemon) return;
+
+        const pokemonData = {
+            name: pokemon.name,
+            image: pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default,
+            type: `Type : ${pokemon.types.map(type => type.type.name).join(', ')}`,
+            description: `Power: ${pokemon.stats.find(stat => stat.stat.name === 'attack')?.base_stat || 'N/A'}`,
+            pokemonTypes: pokemon.types.map(type => type.type.name),
+            url: `https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`
+        };
+
+        const result = toggleFavorite(pokemonData);
+
+        const message = result.action === 'added'
+            ? `${pokemon.name} added to favorites! ❤️`
+            : `${pokemon.name} removed from favorites`;
+
+        setFavoriteActionFeedback({
+            message,
+            type: result.action
+        });
+
+        setTimeout(() => {
+            setFavoriteActionFeedback(null);
+        }, 3000);
+    };
 
     useEffect(() => {
         const fetchPokemonDetail = async () => {
@@ -114,11 +146,46 @@ const PokemonDetail = () => {
 
     return (
         <div className="container my-5">
-            {/* Back Button */}
-            <button className="btn btn-outline-primary mb-4" onClick={() => navigate(-1)}>
-                <i className="bi bi-arrow-left me-2"></i>
-                Back to Pokemon List
-            </button>
+            {/* Favorites Action Feedback Toast */}
+            {favoriteActionFeedback && (
+                <div className="position-fixed top-0 start-50 translate-middle-x" style={{ zIndex: 1050, marginTop: '20px' }}>
+                    <div className={`alert alert-dismissible fade show ${favoriteActionFeedback.type === 'added' ? 'alert-success' : 'alert-info'
+                        }`} role="alert">
+                        <i className={`bi ${favoriteActionFeedback.type === 'added' ? 'bi-heart-fill text-danger' : 'bi-heart'
+                            } me-2`}></i>
+                        {favoriteActionFeedback.message}
+                        <button
+                            type="button"
+                            className="btn-close"
+                            onClick={() => setFavoriteActionFeedback(null)}
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                </div>
+            )}
+
+            {/* Back Button and Favorite Button */}
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <button className="btn btn-outline-primary" onClick={() => navigate(-1)}>
+                    <i className="bi bi-arrow-left me-2"></i>
+                    Back to Pokemon List
+                </button>
+
+                <button
+                    className={`btn ${isFavorite(pokemon.name)
+                            ? 'btn-danger'
+                            : 'btn-outline-danger'
+                        }`}
+                    onClick={handleFavoriteToggle}
+                    title={isFavorite(pokemon.name) ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                    <i className={`bi ${isFavorite(pokemon.name)
+                            ? 'bi-heart-fill'
+                            : 'bi-heart'
+                        } me-2`}></i>
+                    {isFavorite(pokemon.name) ? 'Remove from Favorites' : 'Add to Favorites'}
+                </button>
+            </div>
 
             {/* Pokemon Header */}
             <div className="row mb-4">
@@ -131,7 +198,12 @@ const PokemonDetail = () => {
                                 className="img-fluid mb-3"
                                 style={{ maxHeight: '300px' }}
                             />
-                            <h1 className="card-title text-capitalize mb-3">{pokemon.name}</h1>
+                            <h1 className="card-title text-capitalize mb-3">
+                                {pokemon.name}
+                                {isFavorite(pokemon.name) && (
+                                    <i className="bi bi-heart-fill text-danger ms-2" title="In Favorites"></i>
+                                )}
+                            </h1>
                             <div className="mb-3">
                                 {pokemon.types.map(type => (
                                     <span

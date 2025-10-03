@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSearch } from '../../../context/SearchContext';
+import { useFavorites } from '../../../context/FavoritesContext';
 import { getPokemonTypes, listCategories } from "../../../services/categories.js";
 import Pagination from "../../pagination/pagination.jsx";
 
@@ -9,18 +10,43 @@ const CARDS_PER_PAGE = 6;
 const Categories = () => {
     const navigate = useNavigate();
     const { searchTerm } = useSearch();
+    const { toggleFavorite, isFavorite, favoritesCount } = useFavorites();
     const [pokemon, setPokemon] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [filteredPokemon, setFilteredPokemon] = useState([]);
     const [types, setTypes] = useState([]);
     const [selectedType, setSelectedType] = useState('All');
+    const [favoriteActionFeedback, setFavoriteActionFeedback] = useState(null);
+
+    // Handle favorite toggle with user feedback
+    const handleFavoriteToggle = (pokemon, event) => {
+        event.stopPropagation(); // Prevent card click event
+
+        const result = toggleFavorite(pokemon);
+
+        // Show feedback message
+        const message = result.action === 'added'
+            ? `${pokemon.name} added to favorites! ❤️`
+            : `${pokemon.name} removed from favorites`;
+
+        setFavoriteActionFeedback({
+            message,
+            type: result.action,
+            pokemon: pokemon.name
+        });
+
+        // Clear feedback after 3 seconds
+        setTimeout(() => {
+            setFavoriteActionFeedback(null);
+        }, 3000);
+    };
 
     const fetchPokemon = async () => {
         try {
             const detailedPokemon = await listCategories();
             const allTypes = await getPokemonTypes();
-            
+
             // Enhance Pokemon data with individual types for filtering
             const enhancedPokemon = detailedPokemon.map(p => {
                 if (!p) return null;
@@ -31,7 +57,7 @@ const Categories = () => {
                     pokemonTypes: pokemonTypes
                 };
             }).filter(Boolean);
-            
+
             setPokemon(enhancedPokemon);
             setFilteredPokemon(enhancedPokemon);
             setTypes(['All', ...allTypes.map(type => type.name)]);
@@ -50,15 +76,15 @@ const Categories = () => {
 
         // Apply search filter
         if (searchTerm && searchTerm.length > 0) {
-            filtered = filtered.filter(p => 
+            filtered = filtered.filter(p =>
                 p.name.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
         // Apply type filter
         if (selectedType !== 'All') {
-            filtered = filtered.filter(p => 
-                p.pokemonTypes && p.pokemonTypes.some(pokemonType => 
+            filtered = filtered.filter(p =>
+                p.pokemonTypes && p.pokemonTypes.some(pokemonType =>
                     pokemonType.toLowerCase() === selectedType.toLowerCase()
                 )
             );
@@ -89,10 +115,28 @@ const Categories = () => {
 
     return (
         <div className="container">
+            {/* Favorites Action Feedback Toast */}
+            {favoriteActionFeedback && (
+                <div className="position-fixed top-0 start-50 translate-middle-x" style={{ zIndex: 1050, marginTop: '20px' }}>
+                    <div className={`alert alert-dismissible fade show ${favoriteActionFeedback.type === 'added' ? 'alert-success' : 'alert-info'
+                        }`} role="alert">
+                        <i className={`bi ${favoriteActionFeedback.type === 'added' ? 'bi-heart-fill text-danger' : 'bi-heart'
+                            } me-2`}></i>
+                        {favoriteActionFeedback.message}
+                        <button
+                            type="button"
+                            className="btn-close"
+                            onClick={() => setFavoriteActionFeedback(null)}
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                </div>
+            )}
+
             {loading ? (
-                <div className="d-flex justify-content-center align-items-center" style={{minHeight: '300px'}}>
+                <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
                     <div className="text-center">
-                        <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
+                        <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
                             <span className="visually-hidden">Loading...</span>
                         </div>
                         <h4 className="mt-3">Loading Pokemon...</h4>
@@ -134,10 +178,10 @@ const Categories = () => {
                                                 'fairy': '#FFB6C1',
                                                 'normal': '#D2B48C'
                                             };
-                                            
+
                                             const isSelected = selectedType === type;
                                             const typeColor = typeColors[type] || '#A8A8A8';
-                                            
+
                                             return (
                                                 <button
                                                     key={type}
@@ -154,8 +198,8 @@ const Categories = () => {
                                                     {type}
                                                     {type !== 'All' && (
                                                         <span className="ms-1 badge bg-light text-dark rounded-pill">
-                                                            {pokemon.filter(p => 
-                                                                p.pokemonTypes && p.pokemonTypes.some(pokemonType => 
+                                                            {pokemon.filter(p =>
+                                                                p.pokemonTypes && p.pokemonTypes.some(pokemonType =>
                                                                     pokemonType.toLowerCase() === type.toLowerCase()
                                                                 )
                                                             ).length}
@@ -170,9 +214,9 @@ const Categories = () => {
                                             );
                                         })}
                                     </div>
-                                    
+
                                     {/* Filter Results Info */}
-                                    <div className="mt-3 text-muted">
+                                    <div className="mt-3 d-flex justify-content-between align-items-center text-muted">
                                         <small>
                                             <i className="bi bi-info-circle me-1"></i>
                                             Showing {filteredPokemon.length} of {pokemon.length} Pokemon
@@ -187,7 +231,7 @@ const Categories = () => {
                                                 </span>
                                             )}
                                             {(searchTerm || selectedType !== 'All') && (
-                                                <button 
+                                                <button
                                                     className="btn btn-link btn-sm text-decoration-none ms-2 p-0"
                                                     onClick={() => {
                                                         setSelectedType('All');
@@ -197,6 +241,13 @@ const Categories = () => {
                                                     <i className="bi bi-x-circle"></i> Clear all filters
                                                 </button>
                                             )}
+                                        </small>
+
+                                        {/* Favorites Counter */}
+                                        <small>
+                                            <i className="bi bi-heart-fill text-danger me-1"></i>
+                                            <span className="badge bg-danger">{favoritesCount}</span>
+                                            <span className="ms-1">Favorites</span>
                                         </small>
                                     </div>
                                 </div>
@@ -237,7 +288,19 @@ const Categories = () => {
                                             >
                                                 View Details
                                             </button>
-                                            <button className="btn btn-outline-secondary btn-sm"><i className="bi bi-heart"></i></button>
+                                            <button
+                                                className={`btn btn-sm ${isFavorite(p.name)
+                                                        ? 'btn-danger'
+                                                        : 'btn-outline-secondary'
+                                                    }`}
+                                                onClick={(e) => handleFavoriteToggle(p, e)}
+                                                title={isFavorite(p.name) ? 'Remove from favorites' : 'Add to favorites'}
+                                            >
+                                                <i className={`bi ${isFavorite(p.name)
+                                                        ? 'bi-heart-fill'
+                                                        : 'bi-heart'
+                                                    }`}></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -246,21 +309,21 @@ const Categories = () => {
                     ) : (
                         <div className="text-center py-5">
                             <div className="mb-3">
-                                <i className="bi bi-search" style={{fontSize: '3rem', color: '#6c757d'}}></i>
+                                <i className="bi bi-search" style={{ fontSize: '3rem', color: '#6c757d' }}></i>
                             </div>
                             <h4 className="text-muted">No Pokemon Found</h4>
                             {searchTerm && selectedType !== 'All' ? (
                                 <>
                                     <p className="text-muted">No Pokemon match both search term <strong>"{searchTerm}"</strong> and type <strong>{selectedType}</strong></p>
                                     <div className="d-flex justify-content-center gap-2">
-                                        <button 
+                                        <button
                                             className="btn btn-outline-primary"
                                             onClick={() => setSelectedType('All')}
                                         >
                                             <i className="bi bi-funnel me-2"></i>
                                             Clear Type Filter
                                         </button>
-                                        <button 
+                                        <button
                                             className="btn btn-primary"
                                             onClick={() => {
                                                 setSelectedType('All');
@@ -280,7 +343,7 @@ const Categories = () => {
                             ) : (
                                 <>
                                     <p className="text-muted">No Pokemon match the selected type filter: <strong>{selectedType}</strong></p>
-                                    <button 
+                                    <button
                                         className="btn btn-primary"
                                         onClick={() => setSelectedType('All')}
                                     >
@@ -291,7 +354,7 @@ const Categories = () => {
                             )}
                         </div>
                     )}
-                    
+
                     {/* Pagination */}
                     {filteredPokemon.length > 0 && (
                         <Pagination
