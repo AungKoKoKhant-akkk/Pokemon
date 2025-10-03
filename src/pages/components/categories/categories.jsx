@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSearch } from '../../../context/SearchContext';
 import { useFavorites } from '../../../context/FavoritesContext';
+import { useComparison } from '../../../context/ComparisonContext';
 import { getPokemonTypes, listCategories } from "../../../services/categories.js";
 import Pagination from "../../pagination/pagination.jsx";
 
@@ -11,6 +12,7 @@ const Categories = () => {
     const navigate = useNavigate();
     const { searchTerm } = useSearch();
     const { toggleFavorite, isFavorite, favoritesCount } = useFavorites();
+    const { addToComparison, removeFromComparison, isInComparison, canAddMore, getComparisonCount } = useComparison();
     const [pokemon, setPokemon] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -18,6 +20,7 @@ const Categories = () => {
     const [types, setTypes] = useState([]);
     const [selectedType, setSelectedType] = useState('All');
     const [favoriteActionFeedback, setFavoriteActionFeedback] = useState(null);
+    const [comparisonFeedback, setComparisonFeedback] = useState(null);
 
     // Handle favorite toggle with user feedback
     const handleFavoriteToggle = (pokemon, event) => {
@@ -39,6 +42,30 @@ const Categories = () => {
         // Clear feedback after 3 seconds
         setTimeout(() => {
             setFavoriteActionFeedback(null);
+        }, 3000);
+    };
+
+    // Handle comparison toggle with user feedback
+    const handleComparisonToggle = (pokemon, event) => {
+        event.stopPropagation(); // Prevent card click event
+
+        let result;
+        if (isInComparison(pokemon.name)) {
+            result = removeFromComparison(pokemon.name);
+        } else {
+            result = addToComparison(pokemon);
+        }
+
+        // Show feedback message
+        setComparisonFeedback({
+            message: result.message,
+            type: result.success ? 'success' : 'error',
+            pokemon: pokemon.name
+        });
+
+        // Clear feedback after 3 seconds
+        setTimeout(() => {
+            setComparisonFeedback(null);
         }, 3000);
     };
 
@@ -127,6 +154,24 @@ const Categories = () => {
                             type="button"
                             className="btn-close"
                             onClick={() => setFavoriteActionFeedback(null)}
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                </div>
+            )}
+
+            {/* Comparison Action Feedback Toast */}
+            {comparisonFeedback && (
+                <div className="position-fixed top-0 start-50 translate-middle-x" style={{ zIndex: 1049, marginTop: favoriteActionFeedback ? '80px' : '20px' }}>
+                    <div className={`alert alert-dismissible fade show ${comparisonFeedback.type === 'success' ? 'alert-info' : 'alert-warning'
+                        }`} role="alert">
+                        <i className={`bi ${comparisonFeedback.type === 'success' ? 'bi-bar-chart-fill' : 'bi-exclamation-triangle'
+                            } me-2`}></i>
+                        {comparisonFeedback.message}
+                        <button
+                            type="button"
+                            className="btn-close"
+                            onClick={() => setComparisonFeedback(null)}
                             aria-label="Close"
                         ></button>
                     </div>
@@ -281,26 +326,56 @@ const Categories = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="card-footer d-flex justify-content-between bg-light">
-                                            <button
-                                                className="btn btn-primary btn-sm"
-                                                onClick={() => navigate(`/pokemon/${p.name.toLowerCase()}`)}
-                                            >
-                                                View Details
-                                            </button>
-                                            <button
-                                                className={`btn btn-sm ${isFavorite(p.name)
-                                                        ? 'btn-danger'
-                                                        : 'btn-outline-secondary'
-                                                    }`}
-                                                onClick={(e) => handleFavoriteToggle(p, e)}
-                                                title={isFavorite(p.name) ? 'Remove from favorites' : 'Add to favorites'}
-                                            >
-                                                <i className={`bi ${isFavorite(p.name)
-                                                        ? 'bi-heart-fill'
-                                                        : 'bi-heart'
-                                                    }`}></i>
-                                            </button>
+                                        <div className="card-footer bg-light">
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                <button
+                                                    className="btn btn-primary btn-sm"
+                                                    onClick={() => navigate(`/pokemon/${p.name.toLowerCase()}`)}
+                                                >
+                                                    View Details
+                                                </button>
+                                                <div className="d-flex gap-2">
+                                                    <button
+                                                        className={`btn btn-sm ${
+                                                            isInComparison(p.name)
+                                                                ? 'btn-warning'
+                                                                : canAddMore()
+                                                                ? 'btn-outline-info'
+                                                                : 'btn-outline-secondary'
+                                                        }`}
+                                                        onClick={(e) => handleComparisonToggle(p, e)}
+                                                        title={
+                                                            isInComparison(p.name)
+                                                                ? 'Remove from comparison'
+                                                                : canAddMore()
+                                                                ? 'Add to comparison'
+                                                                : 'Comparison limit reached'
+                                                        }
+                                                        disabled={!isInComparison(p.name) && !canAddMore()}
+                                                    >
+                                                        <i className={`bi ${
+                                                            isInComparison(p.name)
+                                                                ? 'bi-bar-chart-fill'
+                                                                : 'bi-bar-chart'
+                                                        }`}></i>
+                                                    </button>
+                                                    <button
+                                                        className={`btn btn-sm ${
+                                                            isFavorite(p.name)
+                                                                ? 'btn-danger'
+                                                                : 'btn-outline-secondary'
+                                                        }`}
+                                                        onClick={(e) => handleFavoriteToggle(p, e)}
+                                                        title={isFavorite(p.name) ? 'Remove from favorites' : 'Add to favorites'}
+                                                    >
+                                                        <i className={`bi ${
+                                                            isFavorite(p.name)
+                                                                ? 'bi-heart-fill'
+                                                                : 'bi-heart'
+                                                        }`}></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -14,7 +14,7 @@ const SearchBar = () => {
     const handleInputChange = (e) => {
         const value = e.target.value;
         setLocalSearchTerm(value);
-        
+
         // Real-time search as user types
         updateSearch(value.trim());
     };
@@ -30,16 +30,16 @@ const SearchBar = () => {
                 <div className="col-md-8">
                     <form className="d-flex" onSubmit={handleSubmit}>
                         <div className="input-group rounded-3 overflow-hidden shadow">
-                            <input 
-                                className="form-control form-control-lg" 
-                                type="search" 
-                                placeholder="Search Pokemon by name (e.g., Pikachu, Charizard...)" 
+                            <input
+                                className="form-control form-control-lg"
+                                type="search"
+                                placeholder="Search Pokemon by name (e.g., Pikachu, Charizard...)"
                                 aria-label="Search Pokemon"
                                 value={localSearchTerm}
                                 onChange={handleInputChange}
                             />
                             {localSearchTerm && (
-                                <button 
+                                <button
                                     className="btn btn-outline-secondary"
                                     type="button"
                                     onClick={handleClear}
@@ -53,7 +53,7 @@ const SearchBar = () => {
                             </button>
                         </div>
                     </form>
-                    
+
                     {/* Search Results Info */}
                     {searchTerm && (
                         <div className="mt-2 text-center">
@@ -61,7 +61,7 @@ const SearchBar = () => {
                                 <i className="bi bi-search me-1"></i>
                                 Searching for: <strong>"{searchTerm}"</strong>
                                 {searchTerm && (
-                                    <button 
+                                    <button
                                         className="btn btn-link btn-sm text-decoration-none ms-2 p-0"
                                         onClick={handleClear}
                                     >
