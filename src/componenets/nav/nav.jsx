@@ -2,8 +2,9 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useComparison } from '../../context/ComparisonContext';
 import { useFavorites } from '../../context/FavoritesContext';
+import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 import './nav.css';
-import {assets} from "../../assets/image.js";
+import { assets } from "../../assets/image.js";
 
 const Nav = () => {
     const location = useLocation();
@@ -13,22 +14,22 @@ const Nav = () => {
     return (
         <div className="container nav_main">
             <div className="nav_banner d-flex justify-content-center align-items-center flex-column">
-                <img className="banner" src={assets.pokemon} height="400" width="auto"/>
+                <img className="banner" src={assets.pokemon} height="400" width="auto" />
             </div>
-            
+
             {/* Navigation Links */}
             <nav className="navbar navbar-expand-lg navbar-light bg-light rounded shadow-sm mb-4">
                 <div className="container-fluid">
-                    <div className="navbar-nav mx-auto d-flex flex-row gap-3">
-                        <Link 
-                            to="/" 
+                    <div className="navbar-nav mx-auto d-flex flex-row gap-3 align-items-center">
+                        <Link
+                            to="/"
                             className={`nav-link px-3 ${location.pathname === '/' ? 'active fw-bold' : ''}`}
                         >
                             <i className="bi bi-house-door me-2"></i>
                             Home
                         </Link>
-                        <Link 
-                            to="/comparison" 
+                        <Link
+                            to="/comparison"
                             className={`nav-link px-3 position-relative ${location.pathname === '/comparison' ? 'active fw-bold' : ''}`}
                         >
                             <i className="bi bi-bar-chart me-2"></i>
@@ -39,10 +40,22 @@ const Nav = () => {
                                 </span>
                             )}
                         </Link>
+                        <Link
+                            to="/quiz"
+                            className={`nav-link px-3 ${location.pathname === '/quiz' ? 'active fw-bold' : ''}`}
+                        >
+                            <i className="bi bi-controller me-2"></i>
+                            Quiz
+                        </Link>
                         <span className="nav-link px-3 text-muted">
                             <i className="bi bi-heart-fill text-danger me-2"></i>
                             Favorites: {favoritesCount}
                         </span>
+
+                        {/* Theme Toggle */}
+                        <div className="ms-auto">
+                            <ThemeToggle size="small" />
+                        </div>
                     </div>
                 </div>
             </nav>

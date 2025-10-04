@@ -7,7 +7,7 @@ import { getPokemonTypes, listCategories } from "../../../services/categories.js
 import Pagination from "../../pagination/pagination.jsx";
 
 
-const CARDS_PER_PAGE = 6;
+const CARDS_PER_PAGE_OPTIONS = [6, 12, 24, 48];
 const Categories = () => {
     const navigate = useNavigate();
     const { searchTerm } = useSearch();
@@ -16,6 +16,7 @@ const Categories = () => {
     const [pokemon, setPokemon] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [cardsPerPage, setCardsPerPage] = useState(12);
     const [filteredPokemon, setFilteredPokemon] = useState([]);
     const [types, setTypes] = useState([]);
     const [selectedType, setSelectedType] = useState('All');
@@ -136,9 +137,9 @@ const Categories = () => {
         fetchPokemon();
     }, []);
 
-    const totalPages = Math.ceil(filteredPokemon.length / CARDS_PER_PAGE);
-    const startIdx = (currentPage - 1) * CARDS_PER_PAGE;
-    const currentCards = filteredPokemon.slice(startIdx, startIdx + CARDS_PER_PAGE);
+    const totalPages = Math.ceil(filteredPokemon.length / cardsPerPage);
+    const startIdx = (currentPage - 1) * cardsPerPage;
+    const currentCards = filteredPokemon.slice(startIdx, startIdx + cardsPerPage);
 
     return (
         <div className="container">
@@ -264,7 +265,10 @@ const Categories = () => {
                                     <div className="mt-3 d-flex justify-content-between align-items-center text-muted">
                                         <small>
                                             <i className="bi bi-info-circle me-1"></i>
-                                            Showing {filteredPokemon.length} of {pokemon.length} Pokemon
+                                            Showing {Math.min(startIdx + 1, filteredPokemon.length)}-{Math.min(startIdx + cardsPerPage, filteredPokemon.length)} of {filteredPokemon.length} Pokemon
+                                            {filteredPokemon.length !== pokemon.length && (
+                                                <span className="text-muted"> (filtered from {pokemon.length} total)</span>
+                                            )}
                                             {searchTerm && (
                                                 <span className="ms-2">
                                                     <span className="badge bg-info">Search: "{searchTerm}"</span>
@@ -293,6 +297,11 @@ const Categories = () => {
                                             <i className="bi bi-heart-fill text-danger me-1"></i>
                                             <span className="badge bg-danger">{favoritesCount}</span>
                                             <span className="ms-1">Favorites</span>
+                                            <span className="ms-3">
+                                                <i className="bi bi-bar-chart-fill text-info me-1"></i>
+                                                <span className="badge bg-info">{getComparisonCount()}</span>
+                                                <span className="ms-1">Compare</span>
+                                            </span>
                                         </small>
                                     </div>
                                 </div>
@@ -302,20 +311,22 @@ const Categories = () => {
 
                     {/* Pokemon Grid */}
                     {currentCards.length > 0 ? (
-                        <div className="row mt-2 m-5">
+                        <div className="row mt-4 g-4">
                             {currentCards.map((p, index) => (
-                                <div className="col-md-4 mb-3" key={index}>
-                                    <div className="card" style={{ maxWidth: 320 }}>
+                                <div className="col-lg-3 col-md-4 col-sm-6" key={index}>
+                                    <div className="card h-100 shadow-sm">
                                         <img
-                                            src={p.image} style={{ maxHeight: 200 }}
-                                            className="card-img-top" alt="Pokemon Image"
+                                            src={p.image}
+                                            className="card-img-top"
+                                            alt="Pokemon Image"
+                                            style={{ height: '200px', objectFit: 'contain', padding: '10px' }}
                                         />
-                                        <div className="card-body">
+                                        <div className="card-body d-flex flex-column">
                                             <h5 className="card-title text-capitalize">{p.name}</h5>
                                             <p className="card-text">{p.description}</p>
                                             <p className="card-text">{p.type}</p>
                                             <p className="card-text"><small className="text-muted">Generations: {p.generations}</small></p>
-                                            <div className="d-flex justify-content-between align-items-center">
+                                            <div className="d-flex justify-content-between align-items-center mt-auto">
                                                 <div>
                                                     <i className="bi bi-star-fill text-warning"></i>
                                                     <i className="bi bi-star-fill text-warning"></i>
@@ -336,43 +347,39 @@ const Categories = () => {
                                                 </button>
                                                 <div className="d-flex gap-2">
                                                     <button
-                                                        className={`btn btn-sm ${
-                                                            isInComparison(p.name)
-                                                                ? 'btn-warning'
-                                                                : canAddMore()
+                                                        className={`btn btn-sm ${isInComparison(p.name)
+                                                            ? 'btn-warning'
+                                                            : canAddMore()
                                                                 ? 'btn-outline-info'
                                                                 : 'btn-outline-secondary'
-                                                        }`}
+                                                            }`}
                                                         onClick={(e) => handleComparisonToggle(p, e)}
                                                         title={
                                                             isInComparison(p.name)
                                                                 ? 'Remove from comparison'
                                                                 : canAddMore()
-                                                                ? 'Add to comparison'
-                                                                : 'Comparison limit reached'
+                                                                    ? 'Add to comparison'
+                                                                    : 'Comparison limit reached'
                                                         }
                                                         disabled={!isInComparison(p.name) && !canAddMore()}
                                                     >
-                                                        <i className={`bi ${
-                                                            isInComparison(p.name)
-                                                                ? 'bi-bar-chart-fill'
-                                                                : 'bi-bar-chart'
-                                                        }`}></i>
+                                                        <i className={`bi ${isInComparison(p.name)
+                                                            ? 'bi-bar-chart-fill'
+                                                            : 'bi-bar-chart'
+                                                            }`}></i>
                                                     </button>
                                                     <button
-                                                        className={`btn btn-sm ${
-                                                            isFavorite(p.name)
-                                                                ? 'btn-danger'
-                                                                : 'btn-outline-secondary'
-                                                        }`}
+                                                        className={`btn btn-sm ${isFavorite(p.name)
+                                                            ? 'btn-danger'
+                                                            : 'btn-outline-secondary'
+                                                            }`}
                                                         onClick={(e) => handleFavoriteToggle(p, e)}
                                                         title={isFavorite(p.name) ? 'Remove from favorites' : 'Add to favorites'}
                                                     >
-                                                        <i className={`bi ${
-                                                            isFavorite(p.name)
-                                                                ? 'bi-heart-fill'
-                                                                : 'bi-heart'
-                                                        }`}></i>
+                                                        <i className={`bi ${isFavorite(p.name)
+                                                            ? 'bi-heart-fill'
+                                                            : 'bi-heart'
+                                                            }`}></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -430,8 +437,38 @@ const Categories = () => {
                         </div>
                     )}
 
-                    {/* Pagination */}
+                    {/* Pagination Controls */}
                     {filteredPokemon.length > 0 && (
+                        <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
+                            {/* Page Size Selector */}
+                            <div className="d-flex align-items-center">
+                                <small className="text-muted me-2">Show:</small>
+                                <select
+                                    className="form-select form-select-sm"
+                                    style={{ width: 'auto' }}
+                                    value={cardsPerPage}
+                                    onChange={(e) => {
+                                        setCardsPerPage(Number(e.target.value));
+                                        setCurrentPage(1); // Reset to first page
+                                    }}
+                                >
+                                    {CARDS_PER_PAGE_OPTIONS.map(option => (
+                                        <option key={option} value={option}>
+                                            {option} per page
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Pagination Summary */}
+                            <small className="text-muted">
+                                Page {currentPage} of {totalPages} ({filteredPokemon.length} total results)
+                            </small>
+                        </div>
+                    )}
+
+                    {/* Pagination */}
+                    {filteredPokemon.length > 0 && totalPages > 1 && (
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}

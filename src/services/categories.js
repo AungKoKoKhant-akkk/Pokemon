@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = 'https://pokeapi.co/api/v2/pokemon?limit=20';
+const API_URL = 'https://pokeapi.co/api/v2/pokemon?limit=1000';
 const API_TYPE_URL = 'https://pokeapi.co/api/v2/type';
 
 export const listCategories = async () => {

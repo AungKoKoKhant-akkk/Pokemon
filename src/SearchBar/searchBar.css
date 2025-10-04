@@ -1,9 +1,16 @@
 /* searchBar.css */
 .input-group {
     background: linear-gradient(90deg, #e0eafc 0%, #cfdef3 100%);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     border-radius: 2rem;
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Dark theme for input group */
+.theme-dark .input-group {
+    background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .form-control {
@@ -11,12 +18,34 @@
     background: transparent;
     font-size: 1.1rem;
     padding: 0.75rem 1.25rem;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+/* Ensure white text in dark theme */
+.theme-dark .form-control {
+    color: #ffffff !important;
 }
 
 .form-control:focus {
     box-shadow: none;
     outline: none;
-    background: #fff;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Ensure white text on focus in dark theme */
+.theme-dark .form-control:focus {
+    color: #ffffff !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+/* Better placeholder visibility in dark theme */
+.theme-dark .form-control::placeholder {
+    color: #b3b3b3 !important;
 }
 
 .button-design {
@@ -24,9 +53,19 @@
     border: none;
     color: #fff;
     font-weight: 500;
-    transition: background 0.2s;
+    transition: all 0.3s ease;
 }
 
 .button-design:hover {
     background: linear-gradient(90deg, #2575fc 0%, #6a11cb 100%);
+    transform: translateY(-1px);
+}
+
+/* Dark theme button adjustments */
+.theme-dark .button-design {
+    background: linear-gradient(90deg, #4dabf7 0%, #339af0 100%);
+}
+
+.theme-dark .button-design:hover {
+    background: linear-gradient(90deg, #339af0 0%, #4dabf7 100%);
 }

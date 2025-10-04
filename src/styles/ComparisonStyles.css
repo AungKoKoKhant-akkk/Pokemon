@@ -85,7 +85,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
     animation: shimmer 1.5s infinite;
 }
 
@@ -93,18 +93,36 @@
     0% {
         transform: translateX(-100%);
     }
+
     100% {
         transform: translateX(100%);
     }
 }
 
 /* Stat Colors */
-.stat-hp { background: linear-gradient(135deg, #FF5959, #FF8A80); }
-.stat-attack { background: linear-gradient(135deg, #F5AC78, #FFB74D); }
-.stat-defense { background: linear-gradient(135deg, #FAE078, #FFF176); }
-.stat-special-attack { background: linear-gradient(135deg, #9DB7F5, #90CAF9); }
-.stat-special-defense { background: linear-gradient(135deg, #A7DB8D, #A5D6A7); }
-.stat-speed { background: linear-gradient(135deg, #FA92B2, #F48FB1); }
+.stat-hp {
+    background: linear-gradient(135deg, #FF5959, #FF8A80);
+}
+
+.stat-attack {
+    background: linear-gradient(135deg, #F5AC78, #FFB74D);
+}
+
+.stat-defense {
+    background: linear-gradient(135deg, #FAE078, #FFF176);
+}
+
+.stat-special-attack {
+    background: linear-gradient(135deg, #9DB7F5, #90CAF9);
+}
+
+.stat-special-defense {
+    background: linear-gradient(135deg, #A7DB8D, #A5D6A7);
+}
+
+.stat-speed {
+    background: linear-gradient(135deg, #FA92B2, #F48FB1);
+}
 
 .comparison-summary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -233,34 +251,34 @@
     .comparison-container {
         padding: 1rem 0;
     }
-    
+
     .pokemon-header {
         padding: 1rem;
     }
-    
+
     .pokemon-avatar {
         width: 80px;
         height: 80px;
     }
-    
+
     .pokemon-avatar img {
         width: 60px;
         height: 60px;
     }
-    
+
     .comparison-summary {
         padding: 1.5rem;
     }
-    
+
     .comparison-actions {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .stat-progress {
         height: 20px;
     }
-    
+
     .summary-stat {
         padding: 0.75rem;
     }
