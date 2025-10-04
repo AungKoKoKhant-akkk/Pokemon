@@ -93,6 +93,10 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
     const [searchPokemon, setSearchPokemon] = useState(pokemonName || '');
     const [loadingStage, setLoadingStage] = useState('');
     const [showInstantPreview, setShowInstantPreview] = useState(false);
+    const [selectedPokemon, setSelectedPokemon] = useState(null);
+    const [showPokemonModal, setShowPokemonModal] = useState(false);
+    const [pokemonDetails, setPokemonDetails] = useState(null);
+    const [modalLoading, setModalLoading] = useState(false);
 
     // Ultra-fast evolution chain fetching with aggressive caching
     const fetchEvolutionChain = useCallback(async (pokemon) => {
@@ -162,6 +166,62 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
             setLoadingStage('');
         }
     }, []);
+
+    // Fetch detailed Pokemon information for modal
+    const fetchPokemonDetails = useCallback(async (pokemonName) => {
+        try {
+            setModalLoading(true);
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`);
+            if (!response.ok) throw new Error('Pokemon not found');
+
+            const pokemonData = await response.json();
+
+            // Get species data for description
+            const speciesResponse = await fetch(pokemonData.species.url);
+            let description = 'No description available';
+            if (speciesResponse.ok) {
+                const speciesData = await speciesResponse.json();
+                const englishEntry = speciesData.flavor_text_entries.find(
+                    entry => entry.language.name === 'en'
+                );
+                if (englishEntry) {
+                    description = englishEntry.flavor_text.replace(/\f/g, ' ').trim();
+                }
+            }
+
+            const details = {
+                name: pokemonData.name,
+                id: pokemonData.id,
+                height: pokemonData.height,
+                weight: pokemonData.weight,
+                types: pokemonData.types,
+                stats: pokemonData.stats,
+                abilities: pokemonData.abilities,
+                sprites: pokemonData.sprites,
+                description: description
+            };
+
+            setPokemonDetails(details);
+            setSelectedPokemon(pokemonName);
+            setShowPokemonModal(true);
+        } catch (error) {
+            console.error('Error fetching Pokemon details:', error);
+            alert('Failed to load Pokemon details');
+        } finally {
+            setModalLoading(false);
+        }
+    }, []);
+
+    // Handle Pokemon card click
+    const handlePokemonClick = useCallback((pokemonName) => {
+        if (!isStandalone) {
+            // When embedded in detail page, show modal
+            fetchPokemonDetails(pokemonName);
+        } else {
+            // When standalone, navigate to detail page
+            navigate(`/pokemon/${pokemonName}`);
+        }
+    }, [isStandalone, fetchPokemonDetails, navigate]);
 
     // Get evolution trigger text (cached for performance)
     const getEvolutionTrigger = useCallback((details) => {
@@ -240,7 +300,12 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
     const renderEvolutionNode = useCallback((pokemon, level = 0, isLast = false) => {
         return (
             <div key={pokemon.name} className={`evolution-node level-${level}`}>
-                <div className="pokemon-card" onClick={() => navigate(`/pokemon/${pokemon.name}`)}>
+                <div
+                    className="pokemon-card"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handlePokemonClick(pokemon.name)}
+                    title={`Click to view ${pokemon.name} details`}
+                >
                     <div className="pokemon-image-container">
                         <img
                             src={getOptimizedImageUrl(pokemon)}
@@ -282,7 +347,7 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                 )}
             </div>
         );
-    }, [navigate, getOptimizedImageUrl]);
+    }, [handlePokemonClick, getOptimizedImageUrl]);
 
     // Debounced search with instant preview
     const [searchTimeout, setSearchTimeout] = useState(null);
@@ -535,8 +600,133 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                     </div>
                 </div>
             )}
+
+            {/* Pokemon Details Modal */}
+            {showPokemonModal && (
+                <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    {modalLoading ? 'Loading...' : pokemonDetails?.name?.charAt(0).toUpperCase() + pokemonDetails?.name?.slice(1)}
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setShowPokemonModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                {modalLoading ? (
+                                    <div className="text-center py-4">
+                                        <div className="spinner-border text-primary" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                ) : pokemonDetails ? (
+                                    <div className="row">
+                                        <div className="col-md-4 text-center">
+                                            <img
+                                                src={pokemonDetails.sprites?.other?.['official-artwork']?.front_default || pokemonDetails.sprites?.front_default}
+                                                alt={pokemonDetails.name}
+                                                className="img-fluid mb-3"
+                                                style={{ maxHeight: '200px' }}
+                                            />
+                                            <h6>#{pokemonDetails.id.toString().padStart(3, '0')}</h6>
+                                            <div className="mb-2">
+                                                {pokemonDetails.types.map(type => (
+                                                    <span
+                                                        key={type.type.name}
+                                                        className="badge me-1 px-2 py-1"
+                                                        style={{
+                                                            backgroundColor: getTypeColor(type.type.name),
+                                                            color: 'white'
+                                                        }}
+                                                    >
+                                                        {type.type.name.toUpperCase()}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="col-md-8">
+                                            <p className="text-muted mb-3">{pokemonDetails.description}</p>
+
+                                            <div className="row mb-3">
+                                                <div className="col-6">
+                                                    <strong>Height:</strong> {(pokemonDetails.height / 10).toFixed(1)} m
+                                                </div>
+                                                <div className="col-6">
+                                                    <strong>Weight:</strong> {(pokemonDetails.weight / 10).toFixed(1)} kg
+                                                </div>
+                                            </div>
+
+                                            <div className="mb-3">
+                                                <strong>Abilities:</strong>
+                                                <div>
+                                                    {pokemonDetails.abilities.map(ability => (
+                                                        <span key={ability.ability.name} className="badge bg-secondary me-1">
+                                                            {ability.ability.name.replace('-', ' ')}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <strong>Base Stats:</strong>
+                                                <div className="mt-2">
+                                                    {pokemonDetails.stats.map(stat => (
+                                                        <div key={stat.stat.name} className="mb-1">
+                                                            <div className="d-flex justify-content-between">
+                                                                <small>{stat.stat.name.replace('-', ' ').toUpperCase()}</small>
+                                                                <small>{stat.base_stat}</small>
+                                                            </div>
+                                                            <div className="progress" style={{ height: '4px' }}>
+                                                                <div
+                                                                    className="progress-bar"
+                                                                    style={{ width: `${(stat.base_stat / 200) * 100}%` }}
+                                                                ></div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="alert alert-danger">Failed to load Pokemon details</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
+};
+
+// Helper function for Pokemon type colors
+const getTypeColor = (type) => {
+    const colors = {
+        normal: '#A8A878',
+        fire: '#F08030',
+        water: '#6890F0',
+        electric: '#F8D030',
+        grass: '#78C850',
+        ice: '#98D8D8',
+        fighting: '#C03028',
+        poison: '#A040A0',
+        ground: '#E0C068',
+        flying: '#A890F0',
+        psychic: '#F85888',
+        bug: '#A8B820',
+        rock: '#B8A038',
+        ghost: '#705898',
+        dragon: '#7038F8',
+        dark: '#705848',
+        steel: '#B8B8D0',
+        fairy: '#EE99AC'
+    };
+    return colors[type] || '#68A090';
 };
 
 // Helper functions for evolution stats

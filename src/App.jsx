@@ -14,7 +14,6 @@ import Categories from "./pages/components/categories/categories.jsx";
 import PokemonDetail from "./pages/PokemonDetail/PokemonDetail.jsx";
 import PokemonComparison from "./pages/PokemonComparison/PokemonComparison.jsx";
 import PokemonQuiz from "./pages/PokemonQuiz/PokemonQuiz.jsx";
-import PokemonEvolutionTreeSimple from './pages/PokemonEvolutionTree/PokemonEvolutionTreeSimple';
 
 const App = () => {
     return (
@@ -34,8 +33,6 @@ const App = () => {
                                 <Route path="/pokemon/:name" element={<PokemonDetail />} />
                                 <Route path="/comparison" element={<PokemonComparison />} />
                                 <Route path="/quiz" element={<PokemonQuiz />} />
-                                <Route path="/evolution-tree" element={<PokemonEvolutionTreeSimple isStandalone={true} />} />
-                                <Route path="/evolution-tree/:pokemonName" element={<PokemonEvolutionTreeSimple />} />
                             </Routes>
                         </div>
                     </ComparisonProvider>
