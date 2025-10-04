@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../context/FavoritesContext';
+import PokemonEvolutionTree from '../PokemonEvolutionTree/PokemonEvolutionTree';
 import axios from 'axios';
 
 const PokemonDetail = () => {
@@ -13,6 +14,7 @@ const PokemonDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [favoriteActionFeedback, setFavoriteActionFeedback] = useState(null);
+    const [showEvolutionTree, setShowEvolutionTree] = useState(false);
 
     // Handle favorite toggle with feedback
     const handleFavoriteToggle = () => {
@@ -173,15 +175,15 @@ const PokemonDetail = () => {
 
                 <button
                     className={`btn ${isFavorite(pokemon.name)
-                            ? 'btn-danger'
-                            : 'btn-outline-danger'
+                        ? 'btn-danger'
+                        : 'btn-outline-danger'
                         }`}
                     onClick={handleFavoriteToggle}
                     title={isFavorite(pokemon.name) ? 'Remove from favorites' : 'Add to favorites'}
                 >
                     <i className={`bi ${isFavorite(pokemon.name)
-                            ? 'bi-heart-fill'
-                            : 'bi-heart'
+                        ? 'bi-heart-fill'
+                        : 'bi-heart'
                         } me-2`}></i>
                     {isFavorite(pokemon.name) ? 'Remove from Favorites' : 'Add to Favorites'}
                 </button>
@@ -349,6 +351,40 @@ const PokemonDetail = () => {
                     </div>
                 </div>
             )}
+
+            {/* Evolution Tree Section */}
+            <div className="row mb-4">
+                <div className="col-12">
+                    <div className="card shadow-lg">
+                        <div className="card-header bg-gradient" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <h4 className="mb-0 text-white">
+                                    <i className="bi bi-diagram-3 me-2"></i>
+                                    Evolution Tree
+                                </h4>
+                                <button
+                                    className="btn btn-light btn-sm"
+                                    onClick={() => setShowEvolutionTree(!showEvolutionTree)}
+                                >
+                                    <i className={`bi ${showEvolutionTree ? 'bi-eye-slash' : 'bi-eye'} me-2`}></i>
+                                    {showEvolutionTree ? 'Hide' : 'Show'} Tree
+                                </button>
+                            </div>
+                        </div>
+                        {showEvolutionTree && (
+                            <div className="card-body p-0">
+                                <PokemonEvolutionTree pokemonName={pokemon.name} isStandalone={false} />
+                            </div>
+                        )}
+                        {!showEvolutionTree && (
+                            <div className="card-body text-center py-4">
+                                <i className="bi bi-diagram-3" style={{ fontSize: '3rem', color: '#6c757d' }}></i>
+                                <p className="text-muted mt-2 mb-0">Click "Show Tree" to explore {pokemon.name}'s evolution chain</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
 
             {/* Sprites Gallery */}
             <div className="row">

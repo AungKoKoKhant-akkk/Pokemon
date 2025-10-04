@@ -20,8 +20,17 @@ export const FavoritesProvider = ({ children }) => {
         if (savedFavorites) {
             try {
                 const parsedFavorites = JSON.parse(savedFavorites);
-                setFavorites(parsedFavorites);
-                setFavoritesCount(parsedFavorites.length);
+                // Filter out any invalid favorites (without name property)
+                const validFavorites = parsedFavorites.filter(fav =>
+                    fav && typeof fav === 'object' && fav.name && typeof fav.name === 'string'
+                );
+                setFavorites(validFavorites);
+                setFavoritesCount(validFavorites.length);
+
+                // Update localStorage if we filtered out invalid items
+                if (validFavorites.length !== parsedFavorites.length) {
+                    localStorage.setItem('pokemonFavorites', JSON.stringify(validFavorites));
+                }
             } catch (error) {
                 console.error('Error parsing saved favorites:', error);
                 localStorage.removeItem('pokemonFavorites');
@@ -53,7 +62,10 @@ export const FavoritesProvider = ({ children }) => {
     };
 
     const removeFromFavorites = (pokemonName) => {
-        setFavorites(prev => prev.filter(fav => fav.name.toLowerCase() !== pokemonName.toLowerCase()));
+        if (!pokemonName) return false;
+        setFavorites(prev => prev.filter(fav =>
+            fav && fav.name && fav.name.toLowerCase() !== pokemonName.toLowerCase()
+        ));
         return true; // Removed successfully
     };
 
@@ -68,7 +80,10 @@ export const FavoritesProvider = ({ children }) => {
     };
 
     const isFavorite = (pokemonName) => {
-        return favorites.some(fav => fav.name.toLowerCase() === pokemonName.toLowerCase());
+        if (!pokemonName) return false;
+        return favorites.some(fav =>
+            fav && fav.name && fav.name.toLowerCase() === pokemonName.toLowerCase()
+        );
     };
 
     const clearAllFavorites = () => {
@@ -77,7 +92,10 @@ export const FavoritesProvider = ({ children }) => {
     };
 
     const getFavoriteById = (pokemonName) => {
-        return favorites.find(fav => fav.name.toLowerCase() === pokemonName.toLowerCase());
+        if (!pokemonName) return null;
+        return favorites.find(fav =>
+            fav && fav.name && fav.name.toLowerCase() === pokemonName.toLowerCase()
+        );
     };
 
     return (

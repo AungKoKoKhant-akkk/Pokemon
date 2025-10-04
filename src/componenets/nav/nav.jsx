@@ -47,6 +47,13 @@ const Nav = () => {
                             <i className="bi bi-controller me-2"></i>
                             Quiz
                         </Link>
+                        <Link
+                            to="/evolution-tree"
+                            className={`nav-link px-3 ${location.pathname === '/evolution-tree' ? 'active fw-bold' : ''}`}
+                        >
+                            <i className="bi bi-diagram-3 me-2"></i>
+                            Evolution Tree
+                        </Link>
                         <span className="nav-link px-3 text-muted">
                             <i className="bi bi-heart-fill text-danger me-2"></i>
                             Favorites: {favoritesCount}
