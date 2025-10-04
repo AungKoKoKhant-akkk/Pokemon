@@ -296,17 +296,18 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
         };
     }, [evolutionChain]);
 
-    // Render evolution tree with optimized image loading
+    // Render evolution tree with enhanced card design
     const renderEvolutionNode = useCallback((pokemon, level = 0, isLast = false) => {
         return (
             <div key={pokemon.name} className={`evolution-node level-${level}`}>
                 <div
-                    className="pokemon-card"
-                    style={{ cursor: 'pointer' }}
+                    className="pokemon-card enhanced-card"
                     onClick={() => handlePokemonClick(pokemon.name)}
                     title={`Click to view ${pokemon.name} details`}
                 >
+                    <div className="card-background-pattern"></div>
                     <div className="pokemon-image-container">
+                        <div className="image-glow"></div>
                         <img
                             src={getOptimizedImageUrl(pokemon)}
                             alt={pokemon.name}
@@ -329,10 +330,30 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                             }}
                         />
                     </div>
-                    <h5 className="pokemon-name">{pokemon.name}</h5>
-                    <small className="evolution-trigger">
-                        {getEvolutionTrigger(pokemon.evolutionDetails)}
-                    </small>
+
+                    <div className="pokemon-info">
+                        <div className="pokemon-id-badge">#{pokemon.id.toString().padStart(3, '0')}</div>
+                        <h5 className="pokemon-name">{pokemon.name}</h5>
+
+                        <div className="evolution-requirement">
+                            <i className="bi bi-arrow-up-circle-fill requirement-icon"></i>
+                            <span className="requirement-text">
+                                {getEvolutionTrigger(pokemon.evolutionDetails)}
+                            </span>
+                        </div>
+
+                        <div className="card-actions">
+                            <button className="btn btn-sm btn-primary card-action-btn">
+                                <i className="bi bi-eye me-1"></i>
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="card-hover-overlay">
+                        <i className="bi bi-cursor-fill"></i>
+                        <span>Click for details</span>
+                    </div>
                 </div>
 
                 {pokemon.evolutions && pokemon.evolutions.length > 0 && (
@@ -601,99 +622,198 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                 </div>
             )}
 
-            {/* Pokemon Details Modal */}
+            {/* Enhanced Pokemon Details Modal */}
             {showPokemonModal && (
-                <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">
-                                    {modalLoading ? 'Loading...' : pokemonDetails?.name?.charAt(0).toUpperCase() + pokemonDetails?.name?.slice(1)}
-                                </h5>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => setShowPokemonModal(false)}
-                                ></button>
-                            </div>
-                            <div className="modal-body">
-                                {modalLoading ? (
-                                    <div className="text-center py-4">
-                                        <div className="spinner-border text-primary" role="status">
-                                            <span className="visually-hidden">Loading...</span>
-                                        </div>
-                                    </div>
-                                ) : pokemonDetails ? (
-                                    <div className="row">
-                                        <div className="col-md-4 text-center">
+                <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+                    <div className="modal-dialog modal-xl modal-dialog-centered">
+                        <div className="modal-content enhanced-modal">
+                            <div className="modal-header gradient-header">
+                                <div className="d-flex align-items-center">
+                                    <div className="modal-pokemon-avatar me-3">
+                                        {!modalLoading && pokemonDetails && (
                                             <img
                                                 src={pokemonDetails.sprites?.other?.['official-artwork']?.front_default || pokemonDetails.sprites?.front_default}
                                                 alt={pokemonDetails.name}
-                                                className="img-fluid mb-3"
-                                                style={{ maxHeight: '200px' }}
+                                                className="avatar-image"
                                             />
-                                            <h6>#{pokemonDetails.id.toString().padStart(3, '0')}</h6>
-                                            <div className="mb-2">
-                                                {pokemonDetails.types.map(type => (
-                                                    <span
-                                                        key={type.type.name}
-                                                        className="badge me-1 px-2 py-1"
-                                                        style={{
-                                                            backgroundColor: getTypeColor(type.type.name),
-                                                            color: 'white'
-                                                        }}
-                                                    >
-                                                        {type.type.name.toUpperCase()}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="col-md-8">
-                                            <p className="text-muted mb-3">{pokemonDetails.description}</p>
-
-                                            <div className="row mb-3">
-                                                <div className="col-6">
-                                                    <strong>Height:</strong> {(pokemonDetails.height / 10).toFixed(1)} m
-                                                </div>
-                                                <div className="col-6">
-                                                    <strong>Weight:</strong> {(pokemonDetails.weight / 10).toFixed(1)} kg
-                                                </div>
-                                            </div>
-
-                                            <div className="mb-3">
-                                                <strong>Abilities:</strong>
-                                                <div>
-                                                    {pokemonDetails.abilities.map(ability => (
-                                                        <span key={ability.ability.name} className="badge bg-secondary me-1">
-                                                            {ability.ability.name.replace('-', ' ')}
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h4 className="modal-title mb-1">
+                                            {modalLoading ? 'Loading Pokemon...' :
+                                                `${pokemonDetails?.name?.charAt(0).toUpperCase() + pokemonDetails?.name?.slice(1)}`
+                                            }
+                                        </h4>
+                                        {!modalLoading && pokemonDetails && (
+                                            <div className="modal-subtitle">
+                                                <span className="pokemon-id-large">#{pokemonDetails.id.toString().padStart(3, '0')}</span>
+                                                <div className="type-badges-modal ms-2">
+                                                    {pokemonDetails.types.map(type => (
+                                                        <span
+                                                            key={type.type.name}
+                                                            className="badge type-badge me-1"
+                                                            style={{
+                                                                backgroundColor: getTypeColor(type.type.name),
+                                                                color: 'white'
+                                                            }}
+                                                        >
+                                                            {type.type.name.toUpperCase()}
                                                         </span>
                                                     ))}
                                                 </div>
                                             </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="btn-close btn-close-white"
+                                    onClick={() => setShowPokemonModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body enhanced-modal-body">
+                                {modalLoading ? (
+                                    <div className="text-center py-5">
+                                        <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }} role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                        <h5>Loading Pokemon Details...</h5>
+                                    </div>
+                                ) : pokemonDetails ? (
+                                    <div className="row">
+                                        {/* Left Column - Image and Basic Info */}
+                                        <div className="col-lg-4">
+                                            <div className="pokemon-showcase">
+                                                <div className="showcase-background"></div>
+                                                <img
+                                                    src={pokemonDetails.sprites?.other?.['official-artwork']?.front_default || pokemonDetails.sprites?.front_default}
+                                                    alt={pokemonDetails.name}
+                                                    className="showcase-image"
+                                                />
+                                            </div>
 
-                                            <div>
-                                                <strong>Base Stats:</strong>
-                                                <div className="mt-2">
-                                                    {pokemonDetails.stats.map(stat => (
-                                                        <div key={stat.stat.name} className="mb-1">
-                                                            <div className="d-flex justify-content-between">
-                                                                <small>{stat.stat.name.replace('-', ' ').toUpperCase()}</small>
-                                                                <small>{stat.base_stat}</small>
-                                                            </div>
-                                                            <div className="progress" style={{ height: '4px' }}>
-                                                                <div
-                                                                    className="progress-bar"
-                                                                    style={{ width: `${(stat.base_stat / 200) * 100}%` }}
-                                                                ></div>
-                                                            </div>
+                                            <div className="basic-info-card mt-4">
+                                                <h6 className="info-title">
+                                                    <i className="bi bi-info-circle me-2"></i>
+                                                    Basic Information
+                                                </h6>
+                                                <div className="info-grid">
+                                                    <div className="info-item">
+                                                        <span className="info-label">Height</span>
+                                                        <span className="info-value">{(pokemonDetails.height / 10).toFixed(1)} m</span>
+                                                    </div>
+                                                    <div className="info-item">
+                                                        <span className="info-label">Weight</span>
+                                                        <span className="info-value">{(pokemonDetails.weight / 10).toFixed(1)} kg</span>
+                                                    </div>
+                                                    <div className="info-item">
+                                                        <span className="info-label">BMI</span>
+                                                        <span className="info-value">
+                                                            {((pokemonDetails.weight / 10) / Math.pow(pokemonDetails.height / 10, 2)).toFixed(1)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Right Column - Detailed Stats and Abilities */}
+                                        <div className="col-lg-8">
+                                            <div className="pokemon-description-card mb-4">
+                                                <h6 className="info-title">
+                                                    <i className="bi bi-book me-2"></i>
+                                                    Description
+                                                </h6>
+                                                <p className="description-text">{pokemonDetails.description}</p>
+                                            </div>
+
+                                            <div className="row">
+                                                <div className="col-md-6">
+                                                    <div className="abilities-card">
+                                                        <h6 className="info-title">
+                                                            <i className="bi bi-star me-2"></i>
+                                                            Abilities
+                                                        </h6>
+                                                        <div className="abilities-list">
+                                                            {pokemonDetails.abilities.map((ability, index) => (
+                                                                <div key={ability.ability.name} className="ability-item">
+                                                                    <span className={`ability-badge ${ability.is_hidden ? 'hidden-ability' : 'normal-ability'}`}>
+                                                                        {ability.ability.name.replace('-', ' ').toUpperCase()}
+                                                                        {ability.is_hidden && <small className="ms-1">(Hidden)</small>}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                    ))}
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-md-6">
+                                                    <div className="sprites-preview">
+                                                        <h6 className="info-title">
+                                                            <i className="bi bi-images me-2"></i>
+                                                            Sprites
+                                                        </h6>
+                                                        <div className="sprites-grid">
+                                                            {pokemonDetails.sprites.front_default && (
+                                                                <img src={pokemonDetails.sprites.front_default} alt="Front" className="sprite-img" title="Front" />
+                                                            )}
+                                                            {pokemonDetails.sprites.back_default && (
+                                                                <img src={pokemonDetails.sprites.back_default} alt="Back" className="sprite-img" title="Back" />
+                                                            )}
+                                                            {pokemonDetails.sprites.front_shiny && (
+                                                                <img src={pokemonDetails.sprites.front_shiny} alt="Shiny Front" className="sprite-img shiny" title="Shiny Front" />
+                                                            )}
+                                                            {pokemonDetails.sprites.back_shiny && (
+                                                                <img src={pokemonDetails.sprites.back_shiny} alt="Shiny Back" className="sprite-img shiny" title="Shiny Back" />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="stats-section mt-4">
+                                                <h6 className="info-title">
+                                                    <i className="bi bi-bar-chart me-2"></i>
+                                                    Base Stats
+                                                    <span className="total-stats ms-2">
+                                                        Total: {pokemonDetails.stats.reduce((sum, stat) => sum + stat.base_stat, 0)}
+                                                    </span>
+                                                </h6>
+                                                <div className="stats-container">
+                                                    {pokemonDetails.stats.map(stat => {
+                                                        const statName = stat.stat.name.replace('-', ' ').toUpperCase();
+                                                        const percentage = Math.min((stat.base_stat / 255) * 100, 100);
+                                                        const statColor = getStatColor(stat.stat.name);
+
+                                                        return (
+                                                            <div key={stat.stat.name} className="stat-row">
+                                                                <div className="stat-info">
+                                                                    <span className="stat-name">{statName}</span>
+                                                                    <span className="stat-value">{stat.base_stat}</span>
+                                                                </div>
+                                                                <div className="stat-bar-container">
+                                                                    <div
+                                                                        className="stat-bar"
+                                                                        style={{
+                                                                            width: `${percentage}%`,
+                                                                            backgroundColor: statColor
+                                                                        }}
+                                                                    ></div>
+                                                                </div>
+                                                                <div className="stat-rating">
+                                                                    {getStatRating(stat.base_stat)}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="alert alert-danger">Failed to load Pokemon details</div>
+                                    <div className="alert alert-danger">
+                                        <i className="bi bi-exclamation-triangle me-2"></i>
+                                        Failed to load Pokemon details
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -727,6 +847,29 @@ const getTypeColor = (type) => {
         fairy: '#EE99AC'
     };
     return colors[type] || '#68A090';
+};
+
+// Helper function for stat colors
+const getStatColor = (statName) => {
+    const colors = {
+        'hp': '#FF5959',
+        'attack': '#F5AC78',
+        'defense': '#FAE078',
+        'special-attack': '#9DB7F5',
+        'special-defense': '#A7DB8D',
+        'speed': '#FA92B2'
+    };
+    return colors[statName] || '#A8A878';
+};
+
+// Helper function for stat ratings
+const getStatRating = (value) => {
+    if (value >= 130) return '⭐⭐⭐⭐⭐';
+    if (value >= 100) return '⭐⭐⭐⭐';
+    if (value >= 80) return '⭐⭐⭐';
+    if (value >= 60) return '⭐⭐';
+    if (value >= 40) return '⭐';
+    return '☆';
 };
 
 // Helper functions for evolution stats
