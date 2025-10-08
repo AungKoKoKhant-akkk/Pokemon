@@ -142,7 +142,7 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                     <div className="d-flex flex-column gap-2">
                         {/* Primary Action */}
                         <button
-                            className={`btn btn-primary btn-sm w-100 ${styles.primaryButton}`}
+                            className={`btn btn-primary btn-sm w-100 mt-2 ${styles.primaryButton}`}
                             onClick={() => navigate(`/pokemon/${pokemon.name.toLowerCase()}`)}
                         >
                             <i className="bi bi-eye me-2"></i>

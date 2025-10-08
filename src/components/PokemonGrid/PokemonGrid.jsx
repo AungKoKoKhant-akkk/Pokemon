@@ -134,17 +134,11 @@ const PokemonGrid = () => {
             {/* Favorites Action Feedback Toast */}
             {feedback.favorite.feedback && (
                 <div className="position-fixed top-0 start-50 translate-middle-x" style={{ zIndex: 1050, marginTop: '20px' }}>
-                    <div className={`alert alert-dismissible fade show ${feedback.favorite.feedback.type === 'added' ? 'alert-success' : 'alert-info'
+                    <div className={`alert fade show ${feedback.favorite.feedback.type === 'added' ? 'alert-success' : 'alert-info'
                         }`} role="alert">
                         <i className={`bi ${feedback.favorite.feedback.type === 'added' ? 'bi-heart-fill text-danger' : 'bi-heart'
                             } me-2`}></i>
                         {feedback.favorite.feedback.message}
-                        <button
-                            type="button"
-                            className="btn-close"
-                            onClick={feedback.favorite.clearFeedback}
-                            aria-label="Close"
-                        ></button>
                     </div>
                 </div>
             )}
@@ -152,17 +146,11 @@ const PokemonGrid = () => {
             {/* Comparison Action Feedback Toast */}
             {feedback.comparison.feedback && (
                 <div className="position-fixed top-0 start-50 translate-middle-x" style={{ zIndex: 1049, marginTop: feedback.favorite.feedback ? '80px' : '20px' }}>
-                    <div className={`alert alert-dismissible fade show ${feedback.comparison.feedback.type === 'success' ? 'alert-info' : 'alert-warning'
+                    <div className={`alert fade show ${feedback.comparison.feedback.type === 'success' ? 'alert-info' : 'alert-warning'
                         }`} role="alert">
                         <i className={`bi ${feedback.comparison.feedback.type === 'success' ? 'bi-bar-chart-fill' : 'bi-exclamation-triangle'
                             } me-2`}></i>
                         {feedback.comparison.feedback.message}
-                        <button
-                            type="button"
-                            className="btn-close"
-                            onClick={feedback.comparison.clearFeedback}
-                            aria-label="Close"
-                        ></button>
                     </div>
                 </div>
             )}
@@ -211,25 +199,7 @@ const PokemonGrid = () => {
                             {searchTerm && selectedType !== 'All' ? (
                                 <>
                                     <p className="text-muted">No Pokemon match both search term <strong>"{searchTerm}"</strong> and type <strong>{selectedType}</strong></p>
-                                    <div className="d-flex justify-content-center gap-2">
-                                        <button
-                                            className="btn btn-outline-primary"
-                                            onClick={() => handleTypeFilter('All')}
-                                        >
-                                            <i className="bi bi-funnel me-2"></i>
-                                            Clear Type Filter
-                                        </button>
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={() => {
-                                                setSelectedType('All');
-                                                // Would need to clear search through context
-                                            }}
-                                        >
-                                            <i className="bi bi-arrow-clockwise me-2"></i>
-                                            Clear All Filters
-                                        </button>
-                                    </div>
+                                    <p className="text-muted small">Try clearing your search or selecting a different type filter</p>
                                 </>
                             ) : searchTerm ? (
                                 <>

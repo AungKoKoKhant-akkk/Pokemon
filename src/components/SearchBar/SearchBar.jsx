@@ -2,20 +2,14 @@ import React, { useState } from 'react';
 import { useSearch } from '../../context/SearchContext';
 import "./SearchBar.css"
 
+// Updated: Fixed duplicate buttons issue - SIMPLIFIED VERSION
 const SearchBar = () => {
     const { searchTerm, updateSearch, clearSearch } = useSearch();
     const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        updateSearch(localSearchTerm.trim());
-    };
-
     const handleInputChange = (e) => {
         const value = e.target.value;
         setLocalSearchTerm(value);
-
-        // Real-time search as user types
         updateSearch(value.trim());
     };
 
@@ -28,46 +22,74 @@ const SearchBar = () => {
         <div className="container">
             <div className="row justify-content-center mb-5">
                 <div className="col-md-8">
-                    <form className="d-flex" onSubmit={handleSubmit}>
-                        <div className="input-group rounded-3 overflow-hidden shadow">
-                            <input
-                                className="form-control form-control-lg"
-                                type="search"
-                                placeholder="Search Pokemon by name (e.g., Pikachu, Charizard...)"
-                                aria-label="Search Pokemon"
-                                value={localSearchTerm}
-                                onChange={handleInputChange}
-                            />
-                            {localSearchTerm && (
-                                <button
-                                    className="btn btn-outline-secondary"
-                                    type="button"
-                                    onClick={handleClear}
-                                    title="Clear search"
-                                >
-                                    <i className="bi bi-x-lg"></i>
-                                </button>
-                            )}
-                            <button className="btn btn-primary px-4 button-design" type="submit">
-                                <i className="bi bi-search"></i>
+                    <div className="position-relative">
+                        <input
+                            className="form-control form-control-lg"
+                            type="text"
+                            placeholder="Search Pokemon by name (e.g., Pikachu, Charizard...)"
+                            aria-label="Search Pokemon"
+                            value={localSearchTerm}
+                            onChange={handleInputChange}
+                            autoComplete="off"
+                            style={{
+                                borderRadius: '2rem',
+                                paddingLeft: '50px',
+                                paddingRight: localSearchTerm ? '50px' : '20px',
+                                background: 'linear-gradient(90deg, #e0eafc 0%, #cfdef3 100%)',
+                                border: 'none',
+                                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
+                            }}
+                        />
+                        {/* Search Button */}
+                        <button
+                            className="btn"
+                            type="button"
+                            disabled
+                            style={{
+                                position: 'absolute',
+                                left: '10px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                border: 'none',
+                                background: 'transparent',
+                                color: '#6c757d',
+                                cursor: 'default'
+                            }}
+                        >
+                            🔍
+                        </button>
+                        {/* Clear Button */}
+                        {localSearchTerm && (
+                            <button
+                                className="btn btn-sm"
+                                type="button"
+                                onClick={handleClear}
+                                title="Clear search"
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    border: 'none',
+                                    background: 'rgba(108, 117, 125, 0.2)',
+                                    borderRadius: '50%',
+                                    width: '30px',
+                                    height: '30px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                ✕
                             </button>
-                        </div>
-                    </form>
+                        )}
+                    </div>
 
                     {/* Search Results Info */}
                     {searchTerm && (
                         <div className="mt-2 text-center">
                             <small className="text-muted">
-                                <i className="bi bi-search me-1"></i>
-                                Searching for: <strong>"{searchTerm}"</strong>
-                                {searchTerm && (
-                                    <button
-                                        className="btn btn-link btn-sm text-decoration-none ms-2 p-0"
-                                        onClick={handleClear}
-                                    >
-                                        <i className="bi bi-x-circle"></i> Clear
-                                    </button>
-                                )}
+                                🔍 Searching for: <strong>"{searchTerm}"</strong>
                             </small>
                         </div>
                     )}

@@ -102,17 +102,6 @@ const TypeFilter = ({
                                             </span>
                                         )}
                                     </div>
-
-                                    {/* Clear Filters */}
-                                    {(searchTerm || selectedType !== 'All') && (
-                                        <button
-                                            className="btn btn-link btn-sm text-decoration-none p-0"
-                                            onClick={clearAllFilters}
-                                        >
-                                            <i className="bi bi-x-circle me-1"></i>
-                                            Clear filters
-                                        </button>
-                                    )}
                                 </div>
 
                                 {/* Counters */}
