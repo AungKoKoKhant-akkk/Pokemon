@@ -69,6 +69,10 @@ export const PokemonDataProvider = ({ children }) => {
 
                             return {
                                 ...p,
+                                id: details.data.id,
+                                height: details.data.height,
+                                weight: details.data.weight,
+                                base_experience: details.data.base_experience,
                                 description: `Power: ${attackStat ? attackStat.base_stat : "N/A"}`,
                                 type: `Type : ${types || "N/A"}`,
                                 pokemonTypes: validTypes,

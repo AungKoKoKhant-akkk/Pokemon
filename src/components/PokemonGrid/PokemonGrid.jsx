@@ -4,30 +4,40 @@ import { useSearch } from '../../context/SearchContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useComparison } from '../../context/ComparisonContext';
 import { usePokemonData } from '../../context/PokemonDataContext';
-import { getPokemonTypeColor, getPokemonImageFallbacks } from '../../utils';
+import { getPokemonTypeColor } from '../../utils';
 import { useLocalStorageObject, useMultipleFeedback } from '../../hooks';
 import Pagination from "../Pagination/Pagination.jsx";
+import PokemonCard from './PokemonCard';
+import TypeFilter from './TypeFilter';
+import { CARDS_PER_PAGE_OPTIONS, DEFAULT_CARDS_PER_PAGE, DEFAULT_PAGE } from '../../constants/pokemonGrid';
 
 
-const CARDS_PER_PAGE_OPTIONS = [6, 12, 24, 48];
 const PokemonGrid = () => {
     const navigate = useNavigate();
     const { searchTerm } = useSearch();
-    const { toggleFavorite, isFavorite, favoritesCount } = useFavorites();
-    const { addToComparison, removeFromComparison, isInComparison, canAddMore, getComparisonCount } = useComparison();
+    const { favoritesCount } = useFavorites();
+    const { getComparisonCount } = useComparison();
     const { pokemonList, pokemonTypes, isLoading } = usePokemonData();
     const [pokemon, setPokemon] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Use custom hook for localStorage pagination state
     const [paginationState, , setPaginationValue] = useLocalStorageObject('pokemonList', {
-        Page: 1,
-        CardsPerPage: 12,
+        Page: DEFAULT_PAGE,
+        CardsPerPage: DEFAULT_CARDS_PER_PAGE,
         Type: 'All'
     });
 
     // Extract values for easier use
     const { Page: currentPage, CardsPerPage: cardsPerPage, Type: selectedType } = paginationState;
+
+    // Validate and fix localStorage values if they're no longer valid
+    useEffect(() => {
+        if (!CARDS_PER_PAGE_OPTIONS.includes(cardsPerPage)) {
+            console.log(`⚠️ Invalid cards per page value (${cardsPerPage}), resetting to ${DEFAULT_CARDS_PER_PAGE}`);
+            setPaginationValue('CardsPerPage', DEFAULT_CARDS_PER_PAGE);
+        }
+    }, [cardsPerPage, setPaginationValue]);
 
     // Use custom hook for feedback messages
     const feedback = useMultipleFeedback({
@@ -41,36 +51,6 @@ const PokemonGrid = () => {
     // Track previous filter values to detect actual changes
     const prevSearchTerm = useRef(searchTerm);
     const prevSelectedType = useRef(selectedType);
-
-    // Handle favorite toggle with user feedback
-    const handleFavoriteToggle = (pokemon, event) => {
-        event.stopPropagation(); // Prevent card click event
-
-        const result = toggleFavorite(pokemon);
-
-        // Show feedback message using custom hook
-        const message = result.action === 'added'
-            ? `${pokemon.name} added to favorites! ❤️`
-            : `${pokemon.name} removed from favorites`;
-
-        feedback.favorite.showFeedback(message, result.action);
-    };
-
-    // Handle comparison toggle with user feedback
-    const handleComparisonToggle = (pokemon, event) => {
-        event.stopPropagation(); // Prevent card click event
-
-        let result;
-        if (isInComparison(pokemon.name)) {
-            result = removeFromComparison(pokemon.name);
-        } else {
-            result = addToComparison(pokemon);
-        }
-
-        // Show feedback message using custom hook
-        const feedbackType = result.success ? 'success' : 'error';
-        feedback.comparison.showFeedback(result.message, feedbackType);
-    };
 
     // Handle page changes with persistence using custom hook
     const handlePageChange = (page) => {
@@ -199,192 +179,27 @@ const PokemonGrid = () => {
             ) : (
                 <>
                     {/* Type Filter Section */}
-                    <div className="row mb-4">
-                        <div className="col-12">
-                            <div className="card shadow-sm">
-                                <div className="card-header bg-primary text-white">
-                                    <h5 className="mb-0">
-                                        <i className="bi bi-funnel me-2"></i>
-                                        Filter by Type
-                                    </h5>
-                                </div>
-                                <div className="card-body">
-                                    <div className="d-flex flex-wrap gap-2">
-                                        {types.map((type) => {
-                                            const isSelected = selectedType === type;
-                                            const typeColor = type === 'All' ? '#6c757d' : getPokemonTypeColor(type, 'modern');
-
-                                            return (
-                                                <button
-                                                    key={type}
-                                                    className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                                    style={{
-                                                        backgroundColor: isSelected ? typeColor : 'transparent',
-                                                        borderColor: typeColor,
-                                                        color: isSelected ? 'white' : typeColor,
-                                                        fontWeight: isSelected ? 'bold' : 'normal',
-                                                        textTransform: 'capitalize'
-                                                    }}
-                                                    onClick={() => handleTypeFilter(type)}
-                                                >
-                                                    {type}
-                                                    {type !== 'All' && (
-                                                        <span className="ms-1 badge bg-light text-dark rounded-pill">
-                                                            {pokemon.filter(p =>
-                                                                p.pokemonTypes && p.pokemonTypes.some(pokemonType =>
-                                                                    pokemonType.toLowerCase() === type.toLowerCase()
-                                                                )
-                                                            ).length}
-                                                        </span>
-                                                    )}
-                                                    {type === 'All' && (
-                                                        <span className="ms-1 badge bg-light text-dark rounded-pill">
-                                                            {pokemon.length}
-                                                        </span>
-                                                    )}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Filter Results Info */}
-                                    <div className="mt-3 d-flex justify-content-between align-items-center text-muted">
-                                        <small>
-                                            <i className="bi bi-info-circle me-1"></i>
-                                            Showing {Math.min(startIdx + 1, filteredPokemon.length)}-{Math.min(startIdx + cardsPerPage, filteredPokemon.length)} of {filteredPokemon.length} Pokemon
-                                            {filteredPokemon.length !== pokemon.length && (
-                                                <span className="text-muted"> (filtered from {pokemon.length} total)</span>
-                                            )}
-                                            {searchTerm && (
-                                                <span className="ms-2">
-                                                    <span className="badge bg-info">Search: "{searchTerm}"</span>
-                                                </span>
-                                            )}
-                                            {selectedType !== 'All' && (
-                                                <span className="ms-2">
-                                                    <span className="badge bg-secondary">Type: {selectedType}</span>
-                                                </span>
-                                            )}
-                                            {(searchTerm || selectedType !== 'All') && (
-                                                <button
-                                                    className="btn btn-link btn-sm text-decoration-none ms-2 p-0"
-                                                    onClick={() => {
-                                                        setSelectedType('All');
-                                                        // Clear search through context would be better, but this works for now
-                                                    }}
-                                                >
-                                                    <i className="bi bi-x-circle"></i> Clear all filters
-                                                </button>
-                                            )}
-                                        </small>
-
-                                        {/* Favorites Counter */}
-                                        <small>
-                                            <i className="bi bi-heart-fill text-danger me-1"></i>
-                                            <span className="badge bg-danger">{favoritesCount}</span>
-                                            <span className="ms-1">Favorites</span>
-                                            <span className="ms-3">
-                                                <i className="bi bi-bar-chart-fill text-info me-1"></i>
-                                                <span className="badge bg-info">{getComparisonCount()}</span>
-                                                <span className="ms-1">Compare</span>
-                                            </span>
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <TypeFilter
+                        types={types}
+                        selectedType={selectedType}
+                        onTypeFilter={handleTypeFilter}
+                        pokemon={pokemon}
+                        filteredPokemon={filteredPokemon}
+                        searchTerm={searchTerm}
+                        favoritesCount={favoritesCount}
+                        comparisonCount={getComparisonCount()}
+                    />
 
                     {/* Pokemon Grid */}
                     {currentCards.length > 0 ? (
                         <div className="row mt-4 g-4">
-                            {currentCards.map((p, index) => (
-                                <div className="col-lg-3 col-md-4 col-sm-6" key={index}>
-                                    <div className="card h-100 shadow-sm">
-                                        <img
-                                            src={p.image}
-                                            className="card-img-top"
-                                            alt="Pokemon Image"
-                                            style={{ height: '200px', objectFit: 'contain', padding: '10px' }}
-                                            onError={(e) => {
-                                                // Try fallback images if main image fails
-                                                const fallbacks = getPokemonImageFallbacks({ id: p.url.split('/').slice(-2)[0] });
-                                                const currentSrc = e.target.src;
-                                                const nextFallback = fallbacks.find(url => url !== currentSrc);
-
-                                                if (nextFallback) {
-                                                    e.target.src = nextFallback;
-                                                } else {
-                                                    // Ultimate fallback - hide image or show placeholder
-                                                    e.target.style.display = 'none';
-                                                }
-                                            }}
-                                        />
-                                        <div className="card-body d-flex flex-column">
-                                            <h5 className="card-title text-capitalize">{p.name}</h5>
-                                            <p className="card-text">{p.description}</p>
-                                            <p className="card-text">{p.type}</p>
-                                            <p className="card-text"><small className="text-muted">Generations: {p.generations}</small></p>
-                                            <div className="d-flex justify-content-between align-items-center mt-auto">
-                                                <div>
-                                                    <i className="bi bi-star-fill text-warning"></i>
-                                                    <i className="bi bi-star-fill text-warning"></i>
-                                                    <i className="bi bi-star-fill text-warning"></i>
-                                                    <i className="bi bi-star-fill text-warning"></i>
-                                                    <i className="bi bi-star-half text-warning"></i>
-                                                    <small className="text-muted">(4.5)</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="card-footer bg-light">
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <button
-                                                    className="btn btn-primary btn-sm"
-                                                    onClick={() => navigate(`/pokemon/${p.name.toLowerCase()}`)}
-                                                >
-                                                    View Details
-                                                </button>
-                                                <div className="d-flex gap-2">
-                                                    <button
-                                                        className={`btn btn-sm ${isInComparison(p.name)
-                                                            ? 'btn-warning'
-                                                            : canAddMore()
-                                                                ? 'btn-outline-info'
-                                                                : 'btn-outline-secondary'
-                                                            }`}
-                                                        onClick={(e) => handleComparisonToggle(p, e)}
-                                                        title={
-                                                            isInComparison(p.name)
-                                                                ? 'Remove from comparison'
-                                                                : canAddMore()
-                                                                    ? 'Add to comparison'
-                                                                    : 'Comparison limit reached'
-                                                        }
-                                                        disabled={!isInComparison(p.name) && !canAddMore()}
-                                                    >
-                                                        <i className={`bi ${isInComparison(p.name)
-                                                            ? 'bi-bar-chart-fill'
-                                                            : 'bi-bar-chart'
-                                                            }`}></i>
-                                                    </button>
-                                                    <button
-                                                        className={`btn btn-sm ${isFavorite(p.name)
-                                                            ? 'btn-danger'
-                                                            : 'btn-outline-secondary'
-                                                            }`}
-                                                        onClick={(e) => handleFavoriteToggle(p, e)}
-                                                        title={isFavorite(p.name) ? 'Remove from favorites' : 'Add to favorites'}
-                                                    >
-                                                        <i className={`bi ${isFavorite(p.name)
-                                                            ? 'bi-heart-fill'
-                                                            : 'bi-heart'
-                                                            }`}></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            {currentCards.map((pokemon, index) => (
+                                <PokemonCard
+                                    key={`${pokemon.name}-${index}`}
+                                    pokemon={pokemon}
+                                    index={index}
+                                    feedback={feedback}
+                                />
                             ))}
                         </div>
                     ) : (
