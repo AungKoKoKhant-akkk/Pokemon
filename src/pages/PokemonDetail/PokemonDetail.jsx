@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../context/FavoritesContext';
+import { usePokemonData } from '../../context/PokemonDataContext';
+import { getPokemonTypeColor, formatStatName, getStatPercentage, formatPokemonId, getBestPokemonImage } from '../../utils';
 import PokemonEvolutionTree from '../PokemonEvolutionTree/PokemonEvolutionTree';
-import axios from 'axios';
 
 const PokemonDetail = () => {
     const { name } = useParams();
     const navigate = useNavigate();
     const { toggleFavorite, isFavorite } = useFavorites();
+    const { getPokemonDetails, getPokemonSpecies, getEvolutionChain } = usePokemonData();
     const [pokemon, setPokemon] = useState(null);
     const [species, setSpecies] = useState(null);
     const [evolutionChain, setEvolutionChain] = useState(null);
@@ -22,7 +24,7 @@ const PokemonDetail = () => {
 
         const pokemonData = {
             name: pokemon.name,
-            image: pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default,
+            image: getBestPokemonImage(pokemon),
             type: `Type : ${pokemon.types.map(type => type.type.name).join(', ')}`,
             description: `Power: ${pokemon.stats.find(stat => stat.stat.name === 'attack')?.base_stat || 'N/A'}`,
             pokemonTypes: pokemon.types.map(type => type.type.name),
@@ -45,26 +47,31 @@ const PokemonDetail = () => {
         }, 3000);
     };
 
+    // Scroll to top when component mounts
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     useEffect(() => {
         const fetchPokemonDetail = async () => {
             try {
                 setLoading(true);
+                console.log(`🔍 Loading details for ${name} from cache...`);
 
-                // Fetch basic Pokemon data
-                const pokemonResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`);
-                const pokemonData = pokemonResponse.data;
+                // Use cached data methods
+                const pokemonData = await getPokemonDetails(name.toLowerCase());
+                if (!pokemonData) {
+                    throw new Error('Pokemon not found');
+                }
 
-                // Fetch species data for additional info
-                const speciesResponse = await axios.get(pokemonData.species.url);
-                const speciesData = speciesResponse.data;
-
-                // Fetch evolution chain
-                const evolutionResponse = await axios.get(speciesData.evolution_chain.url);
-                const evolutionData = evolutionResponse.data;
+                const speciesData = await getPokemonSpecies(name.toLowerCase());
+                const evolutionData = await getEvolutionChain(speciesData.evolution_chain.url);
 
                 setPokemon(pokemonData);
                 setSpecies(speciesData);
                 setEvolutionChain(evolutionData);
+
+                console.log(`✅ Loaded ${name} details from cache`);
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching Pokemon details:', err);
@@ -78,29 +85,8 @@ const PokemonDetail = () => {
         }
     }, [name]);
 
-    const getTypeColor = (type) => {
-        const colors = {
-            fire: '#FF6B6B',
-            water: '#4ECDC4',
-            grass: '#45B7D1',
-            electric: '#FFA07A',
-            psychic: '#DDA0DD',
-            ice: '#87CEEB',
-            dragon: '#9370DB',
-            dark: '#696969',
-            fighting: '#CD5C5C',
-            poison: '#9932CC',
-            ground: '#DAA520',
-            flying: '#87CEFA',
-            bug: '#32CD32',
-            rock: '#A0522D',
-            ghost: '#4B0082',
-            steel: '#778899',
-            fairy: '#FFB6C1',
-            normal: '#D2B48C'
-        };
-        return colors[type] || '#A8A8A8';
-    };
+    // Use centralized type color utility with modern color scheme
+    const getTypeColor = (type) => getPokemonTypeColor(type, 'modern');
 
     const formatEvolutionChain = (chain) => {
         const evolutions = [];
@@ -195,7 +181,7 @@ const PokemonDetail = () => {
                     <div className="card shadow-lg">
                         <div className="card-body text-center p-5">
                             <img
-                                src={pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default}
+                                src={getBestPokemonImage(pokemon)}
                                 alt={pokemon.name}
                                 className="img-fluid mb-3"
                                 style={{ maxHeight: '300px' }}
@@ -221,7 +207,7 @@ const PokemonDetail = () => {
                                     </span>
                                 ))}
                             </div>
-                            <p className="text-muted">#{pokemon.id.toString().padStart(3, '0')}</p>
+                            <p className="text-muted">#{formatPokemonId(pokemon.id)}</p>
                         </div>
                     </div>
                 </div>

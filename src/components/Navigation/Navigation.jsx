@@ -2,11 +2,11 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useComparison } from '../../context/ComparisonContext';
 import { useFavorites } from '../../context/FavoritesContext';
-import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
-import './nav.css';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
+import './Navigation.css';
 import { assets } from "../../assets/image.js";
 
-const Nav = () => {
+const Navigation = () => {
     const location = useLocation();
     const { getComparisonCount } = useComparison();
     const { favoritesCount } = useFavorites();
@@ -47,10 +47,18 @@ const Nav = () => {
                             <i className="bi bi-controller me-2"></i>
                             Quiz
                         </Link>
-                        <span className="nav-link px-3 text-muted">
+                        <Link
+                            to="/favorites"
+                            className={`nav-link px-3 position-relative ${location.pathname === '/favorites' ? 'active fw-bold' : ''}`}
+                        >
                             <i className="bi bi-heart-fill text-danger me-2"></i>
-                            Favorites: {favoritesCount}
-                        </span>
+                            Favorites
+                            {favoritesCount > 0 && (
+                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {favoritesCount}
+                                </span>
+                            )}
+                        </Link>
 
                         {/* Theme Toggle */}
                         <div className="ms-auto">
@@ -63,4 +71,4 @@ const Nav = () => {
     );
 };
 
-export default Nav;
+export default Navigation;

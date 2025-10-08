@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useComparison } from '../../context/ComparisonContext';
-import axios from 'axios';
+import { usePokemonData } from '../../context/PokemonDataContext';
+import { getPokemonStatColor, getTotalStats, getAverageStats } from '../../utils';
 import { Link } from 'react-router-dom';
 import '../../styles/ComparisonStyles.css';
 
 const PokemonComparison = () => {
     const { comparisonList, removeFromComparison, clearComparison, getComparisonCount } = useComparison();
+    const { getPokemonDetails } = usePokemonData();
     const [pokemonDetails, setPokemonDetails] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -22,12 +24,13 @@ const PokemonComparison = () => {
         setLoading(true);
         setError(null);
         try {
+            console.log(`🔍 Loading comparison details for ${comparisonList.length} Pokemon from cache...`);
             const promises = comparisonList.map(pokemon =>
-                axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`)
+                getPokemonDetails(pokemon.name.toLowerCase())
             );
-            const responses = await Promise.all(promises);
-            const details = responses.map(response => response.data);
-            setPokemonDetails(details);
+            const details = await Promise.all(promises);
+            setPokemonDetails(details.filter(detail => detail !== null));
+            console.log(`✅ Loaded ${details.length} Pokemon details from cache for comparison`);
         } catch (err) {
             setError('Failed to fetch Pokemon details');
             console.error('Error fetching Pokemon details:', err);
@@ -36,17 +39,7 @@ const PokemonComparison = () => {
         }
     };
 
-    const getStatColor = (statName) => {
-        const colors = {
-            hp: '#FF5959',
-            attack: '#F5AC78',
-            defense: '#FAE078',
-            'special-attack': '#9DB7F5',
-            'special-defense': '#A7DB8D',
-            speed: '#FA92B2'
-        };
-        return colors[statName] || '#999999';
-    };
+    const getStatColor = getPokemonStatColor;
 
     const getMaxStatValue = (statName) => {
         if (pokemonDetails.length === 0) return 100;
@@ -58,14 +51,6 @@ const PokemonComparison = () => {
     const calculateStatPercentage = (value, statName) => {
         const maxValue = getMaxStatValue(statName);
         return Math.max((value / maxValue) * 100, 5); // Minimum 5% for visibility
-    };
-
-    const getTotalStats = (pokemon) => {
-        return pokemon.stats.reduce((total, stat) => total + stat.base_stat, 0);
-    };
-
-    const getAverageStats = (pokemon) => {
-        return Math.round(getTotalStats(pokemon) / pokemon.stats.length);
     };
 
     if (comparisonList.length === 0) {

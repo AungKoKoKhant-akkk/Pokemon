@@ -1,27 +1,46 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSearch } from '../../../context/SearchContext';
-import { useFavorites } from '../../../context/FavoritesContext';
-import { useComparison } from '../../../context/ComparisonContext';
-import { getPokemonTypes, listCategories } from "../../../services/categories.js";
-import Pagination from "../../pagination/pagination.jsx";
+import { useSearch } from '../../context/SearchContext';
+import { useFavorites } from '../../context/FavoritesContext';
+import { useComparison } from '../../context/ComparisonContext';
+import { usePokemonData } from '../../context/PokemonDataContext';
+import { getPokemonTypeColor, getPokemonImageFallbacks } from '../../utils';
+import { useLocalStorageObject, useMultipleFeedback } from '../../hooks';
+import Pagination from "../Pagination/Pagination.jsx";
 
 
 const CARDS_PER_PAGE_OPTIONS = [6, 12, 24, 48];
-const Categories = () => {
+const PokemonGrid = () => {
     const navigate = useNavigate();
     const { searchTerm } = useSearch();
     const { toggleFavorite, isFavorite, favoritesCount } = useFavorites();
     const { addToComparison, removeFromComparison, isInComparison, canAddMore, getComparisonCount } = useComparison();
+    const { pokemonList, pokemonTypes, isLoading } = usePokemonData();
     const [pokemon, setPokemon] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [cardsPerPage, setCardsPerPage] = useState(12);
+
+    // Use custom hook for localStorage pagination state
+    const [paginationState, , setPaginationValue] = useLocalStorageObject('pokemonList', {
+        Page: 1,
+        CardsPerPage: 12,
+        Type: 'All'
+    });
+
+    // Extract values for easier use
+    const { Page: currentPage, CardsPerPage: cardsPerPage, Type: selectedType } = paginationState;
+
+    // Use custom hook for feedback messages
+    const feedback = useMultipleFeedback({
+        favorite: { duration: 3000 },
+        comparison: { duration: 3000 }
+    });
+
     const [filteredPokemon, setFilteredPokemon] = useState([]);
     const [types, setTypes] = useState([]);
-    const [selectedType, setSelectedType] = useState('All');
-    const [favoriteActionFeedback, setFavoriteActionFeedback] = useState(null);
-    const [comparisonFeedback, setComparisonFeedback] = useState(null);
+
+    // Track previous filter values to detect actual changes
+    const prevSearchTerm = useRef(searchTerm);
+    const prevSelectedType = useRef(selectedType);
 
     // Handle favorite toggle with user feedback
     const handleFavoriteToggle = (pokemon, event) => {
@@ -29,21 +48,12 @@ const Categories = () => {
 
         const result = toggleFavorite(pokemon);
 
-        // Show feedback message
+        // Show feedback message using custom hook
         const message = result.action === 'added'
             ? `${pokemon.name} added to favorites! ❤️`
             : `${pokemon.name} removed from favorites`;
 
-        setFavoriteActionFeedback({
-            message,
-            type: result.action,
-            pokemon: pokemon.name
-        });
-
-        // Clear feedback after 3 seconds
-        setTimeout(() => {
-            setFavoriteActionFeedback(null);
-        }, 3000);
+        feedback.favorite.showFeedback(message, result.action);
     };
 
     // Handle comparison toggle with user feedback
@@ -57,49 +67,28 @@ const Categories = () => {
             result = addToComparison(pokemon);
         }
 
-        // Show feedback message
-        setComparisonFeedback({
-            message: result.message,
-            type: result.success ? 'success' : 'error',
-            pokemon: pokemon.name
-        });
-
-        // Clear feedback after 3 seconds
-        setTimeout(() => {
-            setComparisonFeedback(null);
-        }, 3000);
+        // Show feedback message using custom hook
+        const feedbackType = result.success ? 'success' : 'error';
+        feedback.comparison.showFeedback(result.message, feedbackType);
     };
 
-    const fetchPokemon = async () => {
-        try {
-            const detailedPokemon = await listCategories();
-            const allTypes = await getPokemonTypes();
+    // Handle page changes with persistence using custom hook
+    const handlePageChange = (page) => {
+        setPaginationValue('Page', page);
+    };
 
-            // Enhance Pokemon data with individual types for filtering
-            const enhancedPokemon = detailedPokemon.map(p => {
-                if (!p) return null;
-                const typeString = p.type.replace('Type : ', '');
-                const pokemonTypes = typeString.split(', ').map(t => t.trim());
-                return {
-                    ...p,
-                    pokemonTypes: pokemonTypes
-                };
-            }).filter(Boolean);
-
-            setPokemon(enhancedPokemon);
-            setFilteredPokemon(enhancedPokemon);
-            setTypes(['All', ...allTypes.map(type => type.name)]);
-            setLoading(false);
-            console.log('Enhanced Pokemon:', enhancedPokemon);
-            console.log('Types:', allTypes);
-        } catch (error) {
-            console.error('Error fetching Pokémon data:', error);
+    const processCachedData = () => {
+        if (pokemonList.length > 0) {
+            console.log('📋 Using cached Pokemon data!');
+            setPokemon(pokemonList);
+            setFilteredPokemon(pokemonList);
+            setTypes(pokemonTypes);
             setLoading(false);
         }
     }
 
     // Combined filtering function for both search and type filtering
-    const applyFilters = () => {
+    const applyFilters = (shouldResetPage = false) => {
         let filtered = pokemon;
 
         // Apply search filter
@@ -119,23 +108,42 @@ const Categories = () => {
         }
 
         setFilteredPokemon(filtered);
-        setCurrentPage(1); // Reset to first page when filters change
+
+        // Only reset to first page when filters actually change, not on component remount
+        if (shouldResetPage) {
+            setPaginationValue('Page', 1);
+        }
     };
 
     const handleTypeFilter = (type) => {
-        setSelectedType(type);
+        setPaginationValue('Type', type);
+        setPaginationValue('Page', 1); // Reset to first page when changing filter
     };
 
     // Apply filters whenever search term, selected type, or pokemon data changes
     useEffect(() => {
         if (pokemon.length > 0) {
-            applyFilters();
+            // Check if filters actually changed
+            const filtersChanged = (
+                prevSearchTerm.current !== searchTerm ||
+                prevSelectedType.current !== selectedType
+            );
+
+            applyFilters(filtersChanged);
+
+            // Update previous values
+            prevSearchTerm.current = searchTerm;
+            prevSelectedType.current = selectedType;
         }
     }, [searchTerm, selectedType, pokemon]);
 
     useEffect(() => {
-        fetchPokemon();
-    }, []);
+        if (!isLoading && pokemonList.length > 0) {
+            processCachedData();
+        } else {
+            setLoading(isLoading);
+        }
+    }, [isLoading, pokemonList, pokemonTypes]);
 
     const totalPages = Math.ceil(filteredPokemon.length / cardsPerPage);
     const startIdx = (currentPage - 1) * cardsPerPage;
@@ -144,17 +152,17 @@ const Categories = () => {
     return (
         <div className="container">
             {/* Favorites Action Feedback Toast */}
-            {favoriteActionFeedback && (
+            {feedback.favorite.feedback && (
                 <div className="position-fixed top-0 start-50 translate-middle-x" style={{ zIndex: 1050, marginTop: '20px' }}>
-                    <div className={`alert alert-dismissible fade show ${favoriteActionFeedback.type === 'added' ? 'alert-success' : 'alert-info'
+                    <div className={`alert alert-dismissible fade show ${feedback.favorite.feedback.type === 'added' ? 'alert-success' : 'alert-info'
                         }`} role="alert">
-                        <i className={`bi ${favoriteActionFeedback.type === 'added' ? 'bi-heart-fill text-danger' : 'bi-heart'
+                        <i className={`bi ${feedback.favorite.feedback.type === 'added' ? 'bi-heart-fill text-danger' : 'bi-heart'
                             } me-2`}></i>
-                        {favoriteActionFeedback.message}
+                        {feedback.favorite.feedback.message}
                         <button
                             type="button"
                             className="btn-close"
-                            onClick={() => setFavoriteActionFeedback(null)}
+                            onClick={feedback.favorite.clearFeedback}
                             aria-label="Close"
                         ></button>
                     </div>
@@ -162,17 +170,17 @@ const Categories = () => {
             )}
 
             {/* Comparison Action Feedback Toast */}
-            {comparisonFeedback && (
-                <div className="position-fixed top-0 start-50 translate-middle-x" style={{ zIndex: 1049, marginTop: favoriteActionFeedback ? '80px' : '20px' }}>
-                    <div className={`alert alert-dismissible fade show ${comparisonFeedback.type === 'success' ? 'alert-info' : 'alert-warning'
+            {feedback.comparison.feedback && (
+                <div className="position-fixed top-0 start-50 translate-middle-x" style={{ zIndex: 1049, marginTop: feedback.favorite.feedback ? '80px' : '20px' }}>
+                    <div className={`alert alert-dismissible fade show ${feedback.comparison.feedback.type === 'success' ? 'alert-info' : 'alert-warning'
                         }`} role="alert">
-                        <i className={`bi ${comparisonFeedback.type === 'success' ? 'bi-bar-chart-fill' : 'bi-exclamation-triangle'
+                        <i className={`bi ${feedback.comparison.feedback.type === 'success' ? 'bi-bar-chart-fill' : 'bi-exclamation-triangle'
                             } me-2`}></i>
-                        {comparisonFeedback.message}
+                        {feedback.comparison.feedback.message}
                         <button
                             type="button"
                             className="btn-close"
-                            onClick={() => setComparisonFeedback(null)}
+                            onClick={feedback.comparison.clearFeedback}
                             aria-label="Close"
                         ></button>
                     </div>
@@ -203,30 +211,8 @@ const Categories = () => {
                                 <div className="card-body">
                                     <div className="d-flex flex-wrap gap-2">
                                         {types.map((type) => {
-                                            const typeColors = {
-                                                'All': '#6c757d',
-                                                'fire': '#FF6B6B',
-                                                'water': '#4ECDC4',
-                                                'grass': '#45B7D1',
-                                                'electric': '#FFA07A',
-                                                'psychic': '#DDA0DD',
-                                                'ice': '#87CEEB',
-                                                'dragon': '#9370DB',
-                                                'dark': '#696969',
-                                                'fighting': '#CD5C5C',
-                                                'poison': '#9932CC',
-                                                'ground': '#DAA520',
-                                                'flying': '#87CEFA',
-                                                'bug': '#32CD32',
-                                                'rock': '#A0522D',
-                                                'ghost': '#4B0082',
-                                                'steel': '#778899',
-                                                'fairy': '#FFB6C1',
-                                                'normal': '#D2B48C'
-                                            };
-
                                             const isSelected = selectedType === type;
-                                            const typeColor = typeColors[type] || '#A8A8A8';
+                                            const typeColor = type === 'All' ? '#6c757d' : getPokemonTypeColor(type, 'modern');
 
                                             return (
                                                 <button
@@ -320,6 +306,19 @@ const Categories = () => {
                                             className="card-img-top"
                                             alt="Pokemon Image"
                                             style={{ height: '200px', objectFit: 'contain', padding: '10px' }}
+                                            onError={(e) => {
+                                                // Try fallback images if main image fails
+                                                const fallbacks = getPokemonImageFallbacks({ id: p.url.split('/').slice(-2)[0] });
+                                                const currentSrc = e.target.src;
+                                                const nextFallback = fallbacks.find(url => url !== currentSrc);
+
+                                                if (nextFallback) {
+                                                    e.target.src = nextFallback;
+                                                } else {
+                                                    // Ultimate fallback - hide image or show placeholder
+                                                    e.target.style.display = 'none';
+                                                }
+                                            }}
                                         />
                                         <div className="card-body d-flex flex-column">
                                             <h5 className="card-title text-capitalize">{p.name}</h5>
@@ -400,7 +399,7 @@ const Categories = () => {
                                     <div className="d-flex justify-content-center gap-2">
                                         <button
                                             className="btn btn-outline-primary"
-                                            onClick={() => setSelectedType('All')}
+                                            onClick={() => handleTypeFilter('All')}
                                         >
                                             <i className="bi bi-funnel me-2"></i>
                                             Clear Type Filter
@@ -427,7 +426,7 @@ const Categories = () => {
                                     <p className="text-muted">No Pokemon match the selected type filter: <strong>{selectedType}</strong></p>
                                     <button
                                         className="btn btn-primary"
-                                        onClick={() => setSelectedType('All')}
+                                        onClick={() => handleTypeFilter('All')}
                                     >
                                         <i className="bi bi-arrow-clockwise me-2"></i>
                                         Show All Pokemon
@@ -448,8 +447,9 @@ const Categories = () => {
                                     style={{ width: 'auto' }}
                                     value={cardsPerPage}
                                     onChange={(e) => {
-                                        setCardsPerPage(Number(e.target.value));
-                                        setCurrentPage(1); // Reset to first page
+                                        const newCardsPerPage = Number(e.target.value);
+                                        setPaginationValue('CardsPerPage', newCardsPerPage);
+                                        setPaginationValue('Page', 1); // Reset to first page
                                     }}
                                 >
                                     {CARDS_PER_PAGE_OPTIONS.map(option => (
@@ -472,7 +472,7 @@ const Categories = () => {
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
-                            onPageChange={(page) => setCurrentPage(page)}
+                            onPageChange={handlePageChange}
                         />
                     )}
                 </>
@@ -481,4 +481,4 @@ const Categories = () => {
     );
 };
 
-export default Categories;
+export default PokemonGrid;

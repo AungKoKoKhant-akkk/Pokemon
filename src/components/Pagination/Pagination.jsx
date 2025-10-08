@@ -41,18 +41,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     return (
         <nav aria-label="Page navigation">
             <ul className="pagination pagination-gradient justify-content-center">
-                {/* First Page */}
-                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                    <button
-                        className="page-link"
-                        onClick={() => onPageChange(1)}
-                        disabled={currentPage === 1}
-                        title="First Page"
-                    >
-                        <i className="bi bi-chevron-double-left"></i>
-                    </button>
-                </li>
-
                 {/* Previous Page */}
                 <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                     <button
@@ -90,18 +78,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                         title="Next Page"
                     >
                         <i className="bi bi-caret-right-fill"></i>
-                    </button>
-                </li>
-
-                {/* Last Page */}
-                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                    <button
-                        className="page-link"
-                        onClick={() => onPageChange(totalPages)}
-                        disabled={currentPage === totalPages}
-                        title="Last Page"
-                    >
-                        <i className="bi bi-chevron-double-right"></i>
                     </button>
                 </li>
             </ul>

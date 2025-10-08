@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useLocalStorage } from '../hooks';
 
 const ThemeContext = createContext();
 
@@ -11,16 +12,11 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-    // Initialize theme from localStorage or default to 'light'
-    const [theme, setTheme] = useState(() => {
-        const savedTheme = localStorage.getItem('pokemon-app-theme');
-        return savedTheme || 'light';
-    });
+    // Use custom hook for theme persistence
+    const [theme, setTheme] = useLocalStorage('pokemon-app-theme', 'light');
 
-    // Update localStorage and document class when theme changes
+    // Update document class when theme changes
     useEffect(() => {
-        localStorage.setItem('pokemon-app-theme', theme);
-
         // Update document body class for global theme styling
         document.body.className = document.body.className.replace(/theme-\w+/g, '');
         document.body.classList.add(`theme-${theme}`);

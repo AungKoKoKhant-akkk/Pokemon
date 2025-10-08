@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useSearch } from '../context/SearchContext';
-import "./searchBar.css"
+import { useSearch } from '../../context/SearchContext';
+import "./SearchBar.css"
 
 const SearchBar = () => {
     const { searchTerm, updateSearch, clearSearch } = useSearch();

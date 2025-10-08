@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
+import { getPokemonTypeColor, getPokemonStatColor, getStatRating, formatStatName, getStatPercentage, getOptimizedImageUrl, getPokemonImageFallbacks, getBestPokemonImage } from '../../utils';
 import axios from 'axios';
 import './PokemonEvolutionTree.css';
 
@@ -314,13 +315,8 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                             className="pokemon-image"
                             loading="lazy"
                             onError={(e) => {
-                                // Fast fallback chain
-                                const fallbacks = [
-                                    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`,
-                                    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${pokemon.id}.png`,
-                                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='
-                                ];
-
+                                // Use centralized fallback system
+                                const fallbacks = getPokemonImageFallbacks(pokemon);
                                 const currentSrc = e.target.src;
                                 const nextFallback = fallbacks.find(url => url !== currentSrc);
 
@@ -632,7 +628,7 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                                     <div className="modal-pokemon-avatar me-3">
                                         {!modalLoading && pokemonDetails && (
                                             <img
-                                                src={pokemonDetails.sprites?.other?.['official-artwork']?.front_default || pokemonDetails.sprites?.front_default}
+                                                src={getBestPokemonImage(pokemonDetails)}
                                                 alt={pokemonDetails.name}
                                                 className="avatar-image"
                                             />
@@ -653,7 +649,7 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                                                             key={type.type.name}
                                                             className="badge type-badge me-1"
                                                             style={{
-                                                                backgroundColor: getTypeColor(type.type.name),
+                                                                backgroundColor: getPokemonTypeColor(type.type.name),
                                                                 color: 'white'
                                                             }}
                                                         >
@@ -686,7 +682,7 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                                             <div className="pokemon-showcase">
                                                 <div className="showcase-background"></div>
                                                 <img
-                                                    src={pokemonDetails.sprites?.other?.['official-artwork']?.front_default || pokemonDetails.sprites?.front_default}
+                                                    src={getBestPokemonImage(pokemonDetails)}
                                                     alt={pokemonDetails.name}
                                                     className="showcase-image"
                                                 />
@@ -780,9 +776,9 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                                                 </h6>
                                                 <div className="stats-container">
                                                     {pokemonDetails.stats.map(stat => {
-                                                        const statName = stat.stat.name.replace('-', ' ').toUpperCase();
-                                                        const percentage = Math.min((stat.base_stat / 255) * 100, 100);
-                                                        const statColor = getStatColor(stat.stat.name);
+                                                        const statName = formatStatName(stat.stat.name);
+                                                        const percentage = getStatPercentage(stat.base_stat);
+                                                        const statColor = getPokemonStatColor(stat.stat.name);
 
                                                         return (
                                                             <div key={stat.stat.name} className="stat-row">
@@ -824,53 +820,11 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
     );
 };
 
-// Helper function for Pokemon type colors
-const getTypeColor = (type) => {
-    const colors = {
-        normal: '#A8A878',
-        fire: '#F08030',
-        water: '#6890F0',
-        electric: '#F8D030',
-        grass: '#78C850',
-        ice: '#98D8D8',
-        fighting: '#C03028',
-        poison: '#A040A0',
-        ground: '#E0C068',
-        flying: '#A890F0',
-        psychic: '#F85888',
-        bug: '#A8B820',
-        rock: '#B8A038',
-        ghost: '#705898',
-        dragon: '#7038F8',
-        dark: '#705848',
-        steel: '#B8B8D0',
-        fairy: '#EE99AC'
-    };
-    return colors[type] || '#68A090';
-};
+// Using centralized utilities from utils folder
 
-// Helper function for stat colors
-const getStatColor = (statName) => {
-    const colors = {
-        'hp': '#FF5959',
-        'attack': '#F5AC78',
-        'defense': '#FAE078',
-        'special-attack': '#9DB7F5',
-        'special-defense': '#A7DB8D',
-        'speed': '#FA92B2'
-    };
-    return colors[statName] || '#A8A878';
-};
 
-// Helper function for stat ratings
-const getStatRating = (value) => {
-    if (value >= 130) return '⭐⭐⭐⭐⭐';
-    if (value >= 100) return '⭐⭐⭐⭐';
-    if (value >= 80) return '⭐⭐⭐';
-    if (value >= 60) return '⭐⭐';
-    if (value >= 40) return '⭐';
-    return '☆';
-};
+
+
 
 // Helper functions for evolution stats
 const getEvolutionStages = (chain) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listCategories } from '../../services/categories.js';
+import { usePokemonQuizData, useQuizQuestion, useQuizStats } from '../../hooks/usePokemonQuiz';
 import './PokemonQuiz.css';
 
 const GAME_MODES = {
@@ -18,12 +18,21 @@ const DIFFICULTY_LEVELS = {
 
 const PokemonQuiz = () => {
     const navigate = useNavigate();
+    const {
+        pokemon: quizPokemon,
+        isLoading,
+        loadingProgress,
+        error,
+        count: pokemonCount
+    } = usePokemonQuizData();
+
+    const { generateQuestion } = useQuizQuestion();
+    const { calculateScore, calculateTimeBonus } = useQuizStats();
 
     // Game state
     const [gameState, setGameState] = useState('menu'); // menu, playing, gameOver
     const [gameMode, setGameMode] = useState(GAME_MODES.IMAGE);
     const [difficulty, setDifficulty] = useState('EASY');
-    const [allPokemon, setAllPokemon] = useState([]);
     const [currentQuestion, setCurrentQuestion] = useState(null);
     const [questionNumber, setQuestionNumber] = useState(1);
     const [score, setScore] = useState(0);
@@ -31,28 +40,12 @@ const PokemonQuiz = () => {
     const [selectedAnswer, setSelectedAnswer] = useState('');
     const [showResult, setShowResult] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
-    const [loading, setLoading] = useState(true);
     const [gameStats, setGameStats] = useState({
         totalQuestions: 0,
         correctAnswers: 0,
         timeBonus: 0,
         finalScore: 0
     });
-
-    // Load Pokemon data
-    useEffect(() => {
-        const loadPokemon = async () => {
-            try {
-                const pokemon = await listCategories();
-                setAllPokemon(pokemon.filter(p => p && p.image && p.image !== 'N/A'));
-                setLoading(false);
-            } catch (error) {
-                console.error('Error loading Pokemon:', error);
-                setLoading(false);
-            }
-        };
-        loadPokemon();
-    }, []);
 
     // Timer effect
     useEffect(() => {
@@ -72,59 +65,50 @@ const PokemonQuiz = () => {
     }, [gameState, timeLeft]);
 
     // Generate question based on game mode
-    const generateQuestion = useCallback(() => {
-        if (allPokemon.length === 0) return null;
+    const generateQuizQuestion = useCallback(() => {
+        const questionData = generateQuestion(gameMode, difficulty);
+        if (!questionData) return null;
 
-        const correctPokemon = allPokemon[Math.floor(Math.random() * allPokemon.length)];
-        const wrongOptions = [];
+        const { correctAnswer, options } = questionData;
 
-        // Generate 3 wrong options
-        while (wrongOptions.length < 3) {
-            const randomPokemon = allPokemon[Math.floor(Math.random() * allPokemon.length)];
-            if (randomPokemon.name !== correctPokemon.name &&
-                !wrongOptions.some(p => p.name === randomPokemon.name)) {
-                wrongOptions.push(randomPokemon);
-            }
-        }
-
-        // Shuffle options
-        const allOptions = [correctPokemon, ...wrongOptions].sort(() => Math.random() - 0.5);
-
-        let questionData = {
-            correct: correctPokemon,
-            options: allOptions,
-            type: gameMode
-        };
+        let prompt, visual, isSilhouette = false;
 
         switch (gameMode) {
             case GAME_MODES.IMAGE:
-                questionData.prompt = "Which Pokemon is this?";
-                questionData.visual = correctPokemon.image;
+                prompt = "Which Pokemon is this?";
+                visual = correctAnswer.image;
                 break;
             case GAME_MODES.DESCRIPTION:
-                questionData.prompt = `This Pokemon has ${correctPokemon.type}. Which Pokemon is it?`;
-                questionData.visual = null;
+                prompt = `This Pokemon has type: ${correctAnswer.types.join(', ')}. Which Pokemon is it?`;
+                visual = null;
                 break;
             case GAME_MODES.TYPE:
-                questionData.prompt = `Which Pokemon has the type: ${correctPokemon.type.replace('Type : ', '')}?`;
-                questionData.visual = null;
+                prompt = `Which Pokemon has the type: ${correctAnswer.types[0]}?`;
+                visual = null;
                 break;
             case GAME_MODES.SILHOUETTE:
-                questionData.prompt = "Can you identify this Pokemon from its silhouette?";
-                questionData.visual = correctPokemon.image;
-                questionData.isSilhouette = true;
+                prompt = "Can you identify this Pokemon from its silhouette?";
+                visual = correctAnswer.image;
+                isSilhouette = true;
                 break;
             default:
-                questionData.prompt = "Which Pokemon is this?";
-                questionData.visual = correctPokemon.image;
+                prompt = "Which Pokemon is this?";
+                visual = correctAnswer.image;
         }
 
-        return questionData;
-    }, [allPokemon, gameMode]);
+        return {
+            correct: correctAnswer,
+            options,
+            type: gameMode,
+            prompt,
+            visual,
+            isSilhouette
+        };
+    }, [generateQuestion, gameMode, difficulty]);
 
     // Start game
     const startGame = () => {
-        if (allPokemon.length === 0) return;
+        if (quizPokemon.length === 0) return;
 
         setGameState('playing');
         setQuestionNumber(1);
@@ -133,7 +117,7 @@ const PokemonQuiz = () => {
         setShowResult(false);
         setTimeLeft(DIFFICULTY_LEVELS[difficulty].timeLimit);
 
-        const question = generateQuestion();
+        const question = generateQuizQuestion();
         setCurrentQuestion(question);
     };
 
@@ -182,22 +166,18 @@ const PokemonQuiz = () => {
         setShowResult(false);
         setTimeLeft(DIFFICULTY_LEVELS[difficulty].timeLimit);
 
-        const question = generateQuestion();
+        const question = generateQuizQuestion();
         setCurrentQuestion(question);
     };
 
     // End game
     const endGame = () => {
         const correctAnswers = Math.floor(score / 100);
-        const timeBonus = score - (correctAnswers * 100);
+        const totalQuestions = DIFFICULTY_LEVELS[difficulty].questionsCount;
+        const timeBonus = calculateTimeBonus(timeLeft, DIFFICULTY_LEVELS[difficulty].timeLimit);
+        const stats = calculateScore(correctAnswers, totalQuestions, timeBonus);
 
-        setGameStats({
-            totalQuestions: DIFFICULTY_LEVELS[difficulty].questionsCount,
-            correctAnswers,
-            timeBonus,
-            finalScore: score
-        });
-
+        setGameStats(stats);
         setGameState('gameOver');
     };
 
@@ -221,7 +201,7 @@ const PokemonQuiz = () => {
         }
     };
 
-    if (loading) {
+    if (isLoading || quizPokemon.length === 0) {
         return (
             <div className="container-fluid quiz-container">
                 <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
@@ -231,6 +211,35 @@ const PokemonQuiz = () => {
                         </div>
                         <h4>Loading Pokemon Quiz...</h4>
                         <p className="text-muted">Preparing your Pokemon adventure!</p>
+
+                        {/* Loading Progress */}
+                        {loadingProgress > 0 && (
+                            <div className="mt-3">
+                                <div className="progress mb-2" style={{ height: '20px' }}>
+                                    <div
+                                        className="progress-bar progress-bar-striped progress-bar-animated"
+                                        role="progressbar"
+                                        style={{ width: `${loadingProgress}%` }}
+                                        aria-valuenow={loadingProgress}
+                                        aria-valuemin="0"
+                                        aria-valuemax="100"
+                                    >
+                                        {loadingProgress}%
+                                    </div>
+                                </div>
+                                <small className="text-muted">
+                                    Loading Pokemon data... ({loadingProgress}%)
+                                </small>
+                            </div>
+                        )}
+
+                        {/* Error Display */}
+                        {error && (
+                            <div className="alert alert-warning mt-3" role="alert">
+                                <i className="bi bi-exclamation-triangle me-2"></i>
+                                {error}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -309,7 +318,7 @@ const PokemonQuiz = () => {
                                         <button
                                             className="btn btn-primary btn-lg start-btn"
                                             onClick={startGame}
-                                            disabled={allPokemon.length === 0}
+                                            disabled={quizPokemon.length === 0}
                                         >
                                             <i className="bi bi-play-fill me-2"></i>
                                             Start Quiz
@@ -371,12 +380,12 @@ const PokemonQuiz = () => {
                                                     <div key={index} className="col-md-6">
                                                         <button
                                                             className={`btn answer-btn w-100 ${showResult
-                                                                    ? selectedAnswer === pokemon.name
-                                                                        ? isCorrect ? 'btn-success' : 'btn-danger'
-                                                                        : pokemon.name === currentQuestion.correct.name
-                                                                            ? 'btn-success'
-                                                                            : 'btn-outline-secondary'
-                                                                    : 'btn-outline-primary'
+                                                                ? selectedAnswer === pokemon.name
+                                                                    ? isCorrect ? 'btn-success' : 'btn-danger'
+                                                                    : pokemon.name === currentQuestion.correct.name
+                                                                        ? 'btn-success'
+                                                                        : 'btn-outline-secondary'
+                                                                : 'btn-outline-primary'
                                                                 }`}
                                                             onClick={() => handleAnswerSelect(pokemon.name)}
                                                             disabled={showResult}
