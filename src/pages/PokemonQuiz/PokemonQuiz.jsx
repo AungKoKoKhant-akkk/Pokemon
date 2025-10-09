@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
 import { usePokemonQuizData, useQuizQuestion, useQuizStats } from '../../hooks/usePokemonQuiz';
 import './PokemonQuiz.css';
 
@@ -18,6 +19,7 @@ const DIFFICULTY_LEVELS = {
 
 const PokemonQuiz = () => {
     const navigate = useNavigate();
+    const { isDark } = useTheme();
     const {
         pokemon: quizPokemon,
         isLoading,
@@ -203,7 +205,7 @@ const PokemonQuiz = () => {
 
     if (isLoading || quizPokemon.length === 0) {
         return (
-            <div className="container-fluid quiz-container">
+            <div className={`container-fluid quiz-container ${isDark ? 'theme-dark' : ''}`}>
                 <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
                     <div className="text-center">
                         <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }}>
@@ -247,7 +249,7 @@ const PokemonQuiz = () => {
     }
 
     return (
-        <div className="container-fluid quiz-container">
+        <div className={`container-fluid quiz-container ${isDark ? 'theme-dark' : ''}`}>
             {/* Header */}
             <div className="quiz-header text-center py-4">
                 <h1 className="quiz-title">

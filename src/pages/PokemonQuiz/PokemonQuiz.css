@@ -5,10 +5,21 @@
     padding: 0;
 }
 
+/* Dark Mode Quiz Container */
+.quiz-container.theme-dark {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
 .quiz-header {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Dark Mode Header */
+.theme-dark .quiz-header {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .quiz-title {
@@ -40,6 +51,15 @@
     backdrop-filter: blur(20px);
 }
 
+/* Dark Mode Quiz Card */
+.theme-dark .quiz-card {
+    background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(25, 25, 35, 0.90));
+    color: #e8e8e8;
+    box-shadow:
+        0 25px 45px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
 /* Game Mode Cards */
 .mode-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
@@ -48,14 +68,28 @@
     padding: 1.5rem;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+/* Dark Mode Game Mode Cards */
+.theme-dark .mode-card {
+    background: linear-gradient(135deg, rgba(40, 40, 50, 0.9), rgba(35, 35, 45, 0.8));
+    border: 2px solid rgba(100, 150, 255, 0.4);
+    color: #e8e8e8;
+}
+
+.theme-dark .mode-card:hover {
+    background: linear-gradient(135deg, rgba(50, 50, 60, 0.95), rgba(45, 45, 55, 0.9));
+    border-color: rgba(100, 150, 255, 0.6);
+    transform: translateY(-3px);
 }
 
 .mode-card:hover {
     transform: translateY(-5px);
     border-color: #667eea;
     box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
 }
 
 .mode-card.active {
@@ -63,7 +97,14 @@
     color: white;
     border-color: #667eea;
     transform: scale(1.05);
-    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+}
+
+/* Dark Mode Active Mode Card */
+.theme-dark .mode-card.active {
+    background: linear-gradient(135deg, #4a5bff, #5a6aff);
+    color: white;
+    border-color: #4a5bff;
+    box-shadow: 0 15px 30px rgba(74, 91, 255, 0.4);
 }
 
 .mode-icon {
@@ -87,6 +128,18 @@
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(10px);
+}
+
+/* Dark Mode Difficulty Cards */
+.theme-dark .difficulty-card {
+    background: linear-gradient(135deg, rgba(40, 40, 50, 0.9), rgba(35, 35, 45, 0.8));
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    color: #e8e8e8;
+}
+
+.theme-dark .difficulty-card:hover {
+    background: linear-gradient(135deg, rgba(50, 50, 60, 0.95), rgba(45, 45, 55, 0.9));
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .difficulty-card:hover {
@@ -507,4 +560,153 @@
 
 .quiz-container::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, #5a6fd8, #6a42a0);
+}
+
+/* Comprehensive Dark Mode Styles */
+
+/* Dark mode styles for start button */
+.theme-dark .start-btn {
+    background: linear-gradient(135deg, #4a5568, #6b46c1);
+    color: #f7fafc;
+    box-shadow: 0 10px 25px rgba(106, 70, 193, 0.3);
+}
+
+.theme-dark .start-btn:hover {
+    background: linear-gradient(135deg, #5a67d8, #7c3aed);
+    box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
+    color: #f7fafc;
+}
+
+/* Dark mode styles for game header */
+.theme-dark .game-header {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.9), rgba(26, 32, 44, 0.8));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.theme-dark .question-info,
+.theme-dark .score,
+.theme-dark .timer {
+    color: #f7fafc;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.theme-dark .timer.danger {
+    color: #fc8181;
+}
+
+/* Dark mode styles for question card */
+.theme-dark .question-card {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(26, 32, 44, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 25px 45px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .question-prompt {
+    color: #f7fafc;
+}
+
+/* Dark mode styles for answer buttons */
+.theme-dark .answer-btn {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.8), rgba(26, 32, 44, 0.7));
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+.theme-dark .answer-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(55, 65, 82, 0.9), rgba(36, 42, 54, 0.8));
+    border-color: rgba(159, 122, 234, 0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    color: #f7fafc;
+}
+
+.theme-dark .answer-btn.btn-outline-primary {
+    border-color: #9f7aea;
+    color: #b794f6;
+}
+
+.theme-dark .answer-btn.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #9f7aea, #805ad5);
+    border-color: #9f7aea;
+    color: #f7fafc;
+}
+
+/* Dark mode styles for results */
+.theme-dark .results-card {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(26, 32, 44, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 25px 45px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .results-icon {
+    color: #ffd700;
+}
+
+.theme-dark .stat-card {
+    background: linear-gradient(135deg, rgba(159, 122, 234, 0.15), rgba(128, 90, 213, 0.1));
+    border: 1px solid rgba(159, 122, 234, 0.3);
+    color: #e2e8f0;
+}
+
+.theme-dark .stat-card:hover {
+    background: linear-gradient(135deg, rgba(159, 122, 234, 0.2), rgba(128, 90, 213, 0.15));
+    box-shadow: 0 10px 25px rgba(159, 122, 234, 0.2);
+}
+
+.theme-dark .stat-card h3 {
+    color: #b794f6;
+}
+
+.theme-dark .stat-card p {
+    color: #cbd5e0;
+}
+
+/* Dark mode styles for result buttons */
+.theme-dark .results-actions .btn {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.9), rgba(26, 32, 44, 0.8));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+.theme-dark .results-actions .btn:hover {
+    background: linear-gradient(135deg, rgba(55, 65, 82, 0.9), rgba(36, 42, 54, 0.8));
+    border-color: rgba(159, 122, 234, 0.5);
+    color: #f7fafc;
+    transform: translateY(-2px);
+}
+
+.theme-dark .results-actions .btn-primary {
+    background: linear-gradient(135deg, #9f7aea, #805ad5);
+    border-color: #9f7aea;
+}
+
+.theme-dark .results-actions .btn-primary:hover {
+    background: linear-gradient(135deg, #b794f6, #9f7aea);
+    border-color: #b794f6;
+}
+
+/* Dark mode progress indicator */
+.theme-dark .progress-indicator {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .progress-bar {
+    background: linear-gradient(135deg, #9f7aea, #805ad5);
+}
+
+/* Dark mode scrollbar */
+.theme-dark .quiz-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.theme-dark .quiz-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #9f7aea, #805ad5);
+}
+
+.theme-dark .quiz-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #b794f6, #9f7aea);
 }
