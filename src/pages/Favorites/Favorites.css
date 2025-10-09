@@ -1,0 +1,202 @@
+.favorites-page {
+    min-height: calc(100vh - 200px);
+    padding: 20px 0;
+}
+
+.favorites-header {
+    margin-bottom: 2rem;
+}
+
+.favorites-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--bs-primary);
+    margin-bottom: 1rem;
+}
+
+.favorites-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.empty-favorites {
+    margin: 3rem 0;
+}
+
+.favorites-controls {
+    background: var(--bs-light);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+[data-theme="dark"] .favorites-controls {
+    background: var(--bs-dark);
+    color: var(--bs-light);
+}
+
+.favorite-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--bs-border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.favorite-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .favorite-card {
+    border-color: var(--bs-gray-700);
+    background: var(--bs-gray-800);
+}
+
+[data-theme="dark"] .favorite-card:hover {
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+}
+
+.card-img-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 0.5rem;
+    margin: 1rem;
+    position: relative;
+}
+
+[data-theme="dark"] .card-img-container {
+    background: linear-gradient(135deg, #495057 0%, #6c757d 100%);
+}
+
+.favorite-pokemon-image {
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.favorite-card:hover .favorite-pokemon-image {
+    transform: scale(1.05);
+}
+
+.pokemon-types {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.pokemon-types .badge {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-weight: 500;
+}
+
+/* Sort controls styling */
+.sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sort-controls label {
+    font-weight: 500;
+    margin-bottom: 0;
+    color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .sort-controls label {
+    color: var(--bs-gray-300);
+}
+
+.sort-controls .form-select {
+    min-width: 150px;
+}
+
+/* Modal styling for dark theme */
+[data-theme="dark"] .modal-content {
+    background: var(--bs-dark);
+    color: var(--bs-light);
+    border: 1px solid var(--bs-gray-700);
+}
+
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .modal-footer {
+    border-top-color: var(--bs-gray-700);
+}
+
+/* Remove button styling */
+.favorite-card .btn-outline-danger {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.favorite-card .btn-outline-danger:hover {
+    background: var(--bs-danger);
+    color: white;
+    transform: scale(1.1);
+}
+
+[data-theme="dark"] .favorite-card .btn-outline-danger {
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--bs-danger);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .favorites-title {
+        font-size: 2rem;
+    }
+
+    .favorites-controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .sort-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .sort-controls .form-select {
+        width: 100%;
+    }
+}
+
+/* Loading states and animations */
+.favorite-card {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Empty state styling */
+.empty-favorites i {
+    opacity: 0.3;
+}
+
+.empty-favorites .btn {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
