@@ -283,3 +283,879 @@
         padding: 0.75rem;
     }
 }
+
+/* ===============================
+   DARK MODE STYLES
+   =============================== */
+
+/* Dark mode container */
+.theme-dark .comparison-container {
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    color: #f7fafc;
+}
+
+/* Dark mode comparison cards */
+.theme-dark .comparison-card {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(26, 32, 44, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .comparison-card:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode pokemon header */
+.theme-dark .pokemon-header {
+    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+    color: #f7fafc;
+}
+
+.theme-dark .pokemon-avatar {
+    background: rgba(255, 255, 255, 0.15);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode stat labels and values */
+.theme-dark .stat-label {
+    color: #cbd5e0;
+}
+
+.theme-dark .stat-value {
+    color: #f7fafc;
+}
+
+.theme-dark .stat-progress {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode summary */
+.theme-dark .comparison-summary {
+    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+    color: #f7fafc;
+}
+
+.theme-dark .summary-stat {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .summary-stat h4 {
+    color: #ffd700;
+}
+
+.theme-dark .summary-stat p {
+    color: #f7fafc;
+}
+
+/* Dark mode abilities */
+.theme-dark .abilities-container {
+    background: rgba(45, 55, 72, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .ability-badge {
+    background: linear-gradient(135deg, #9f7aea, #805ad5);
+    color: #f7fafc;
+}
+
+.theme-dark .ability-badge.hidden {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+/* Dark mode header */
+.theme-dark .comparison-header h1 {
+    color: #f7fafc;
+}
+
+.theme-dark .comparison-header p {
+    color: #cbd5e0;
+}
+
+/* Dark mode empty comparison */
+.theme-dark .empty-comparison {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(26, 32, 44, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .empty-comparison i {
+    color: #9f7aea;
+}
+
+.theme-dark .empty-comparison h2 {
+    color: #f7fafc;
+}
+
+.theme-dark .empty-comparison p {
+    color: #cbd5e0;
+}
+
+/* Dark mode buttons */
+.theme-dark .btn-pokemon-compare {
+    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+    color: #f7fafc;
+}
+
+.theme-dark .btn-pokemon-compare:hover {
+    background: linear-gradient(135deg, #b794f6 0%, #9f7aea 100%);
+    box-shadow: 0 8px 25px rgba(159, 122, 234, 0.4);
+    color: #f7fafc;
+}
+
+/* Dark mode comparison counter */
+.theme-dark .comparison-counter {
+    background: linear-gradient(135deg, #38a169, #2f855a);
+    color: #f7fafc;
+}
+
+/* Dark mode loading and error states */
+.theme-dark .spinner-border {
+    color: #9f7aea !important;
+}
+
+.theme-dark .alert-danger {
+    background: rgba(245, 101, 101, 0.1);
+    border-color: rgba(245, 101, 101, 0.3);
+    color: #fed7d7;
+}
+
+/* Dark mode type badges and additional elements */
+.theme-dark .type-badge {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.theme-dark .pokemon-name {
+    color: #f7fafc;
+}
+
+.theme-dark .pokemon-id {
+    color: #cbd5e0;
+}
+
+/* Enhanced dark mode hover effects */
+.theme-dark .comparison-card:hover .pokemon-header {
+    background: linear-gradient(135deg, #b794f6 0%, #9f7aea 100%);
+}
+
+.theme-dark .stat-bar-container:hover .stat-progress {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Dark mode responsive adjustments */
+@media (max-width: 768px) {
+    .theme-dark .comparison-container {
+        background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    }
+
+    .theme-dark .comparison-summary {
+        background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+    }
+}
+
+/* ===============================
+   DARK MODE BASE STATS COMPARISON
+   =============================== */
+
+/* Dark mode stats comparison card */
+.theme-dark .card {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(26, 32, 44, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .card-header {
+    background: linear-gradient(135deg, #9f7aea, #805ad5) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f7fafc !important;
+}
+
+.theme-dark .card-header h5 {
+    color: #f7fafc !important;
+}
+
+.theme-dark .card-header small {
+    color: #e2e8f0 !important;
+}
+
+.theme-dark .card-body {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(26, 32, 44, 0.9));
+    color: #f7fafc;
+}
+
+/* Dark mode table styles */
+.theme-dark .table {
+    color: #f7fafc;
+    background: transparent;
+}
+
+.theme-dark .table-hover tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.theme-dark .table thead th {
+    background: linear-gradient(135deg, #9f7aea, #805ad5) !important;
+    color: #f7fafc !important;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .table-primary {
+    background: linear-gradient(135deg, #9f7aea, #805ad5) !important;
+}
+
+.theme-dark .table td {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f7fafc;
+}
+
+.theme-dark .table th {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f7fafc;
+}
+
+/* Dark mode stat value cells */
+.theme-dark .bg-success {
+    background: linear-gradient(135deg, #38a169, #2f855a) !important;
+    color: #f7fafc !important;
+}
+
+.theme-dark .bg-light {
+    background: linear-gradient(135deg, rgba(55, 65, 82, 0.8), rgba(45, 55, 72, 0.7)) !important;
+    color: #e2e8f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .bg-warning {
+    background: linear-gradient(135deg, #d69e2e, #b7791f) !important;
+    color: #1a202c !important;
+}
+
+.theme-dark .table-warning {
+    background: rgba(214, 158, 46, 0.15) !important;
+    border: 1px solid rgba(214, 158, 46, 0.3);
+}
+
+.theme-dark .table-warning td {
+    background: rgba(214, 158, 46, 0.1) !important;
+    color: #f7fafc;
+}
+
+/* Dark mode winner column styling */
+.theme-dark .text-success {
+    color: #68d391 !important;
+}
+
+.theme-dark .text-warning {
+    color: #faf089 !important;
+}
+
+.theme-dark .text-muted {
+    color: #a0aec0 !important;
+}
+
+/* Dark mode quick summary section */
+.theme-dark .bg-info {
+    background: rgba(159, 122, 234, 0.15) !important;
+    border: 1px solid rgba(159, 122, 234, 0.3);
+}
+
+.theme-dark .text-info {
+    color: #b794f6 !important;
+}
+
+/* Dark mode no data message */
+.theme-dark .text-center.text-muted p {
+    color: #cbd5e0 !important;
+}
+
+/* Dark mode stat names */
+.theme-dark .fw-bold {
+    color: #f7fafc;
+}
+
+.theme-dark .text-uppercase {
+    color: #e2e8f0;
+}
+
+/* Dark mode abilities comparison */
+.theme-dark .card-header.bg-light {
+    background: linear-gradient(135deg, rgba(55, 65, 82, 0.9), rgba(45, 55, 72, 0.8)) !important;
+    color: #f7fafc !important;
+}
+
+/* Enhanced dark mode hover effects for stats table */
+.theme-dark .table tbody tr:hover .bg-light {
+    background: linear-gradient(135deg, rgba(65, 75, 92, 0.9), rgba(55, 65, 82, 0.8)) !important;
+    border-color: rgba(159, 122, 234, 0.3);
+}
+
+.theme-dark .table tbody tr:hover .bg-success {
+    background: linear-gradient(135deg, #48bb78, #38a169) !important;
+}
+
+.theme-dark .table tbody tr:hover .bg-warning {
+    background: linear-gradient(135deg, #ecc94b, #d69e2e) !important;
+}
+
+/* Dark mode responsive table */
+.theme-dark .table-responsive {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+/* Dark mode trophy and crown icons remain visible */
+.theme-dark td small {
+    color: #f7fafc !important;
+}
+
+.theme-dark .fs-4,
+.theme-dark .fs-5 {
+    color: inherit;
+}
+
+/* ===============================
+   MODERN STATS COMPARISON DESIGN
+   =============================== */
+
+.stats-comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-comparison-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.stat-comparison-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.stat-name {
+    font-weight: 700;
+    color: #495057;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.winner-badge {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.stat-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.pokemon-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pokemon-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 120px;
+}
+
+.pokemon-mini-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 2px;
+}
+
+.pokemon-name {
+    font-weight: 600;
+    color: #495057;
+    text-transform: capitalize;
+    font-size: 0.9rem;
+}
+
+.stat-bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.stat-bar-bg {
+    flex: 1;
+    height: 20px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.8s ease;
+    position: relative;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    /* Default background */
+}
+
+/* Stat-specific colors for bars */
+.stat-bar-fill.stat-hp {
+    background: linear-gradient(135deg, #FF5959, #FF8A80);
+}
+
+.stat-bar-fill.stat-attack {
+    background: linear-gradient(135deg, #F5AC78, #FFB74D);
+}
+
+.stat-bar-fill.stat-defense {
+    background: linear-gradient(135deg, #FAE078, #FFF176);
+}
+
+.stat-bar-fill.stat-special-attack {
+    background: linear-gradient(135deg, #9DB7F5, #90CAF9);
+}
+
+.stat-bar-fill.stat-special-defense {
+    background: linear-gradient(135deg, #A7DB8D, #A5D6A7);
+}
+
+.stat-bar-fill.stat-speed {
+    background: linear-gradient(135deg, #FA92B2, #F48FB1);
+}
+
+.stat-bar-fill.winner {
+    animation: pulse-glow 2s infinite;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.8);
+    }
+}
+
+.stat-value {
+    font-weight: 700;
+    color: #495057;
+    font-size: 1rem;
+    min-width: 35px;
+    text-align: center;
+}
+
+.best-indicator {
+    font-size: 1.2rem;
+    animation: twinkle 1.5s infinite;
+}
+
+@keyframes twinkle {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Overall Champion Card */
+.overall-champion-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 193, 7, 0.05));
+    border: 2px solid rgba(255, 193, 7, 0.3);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.champion-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.champion-header h5 {
+    color: #495057;
+    font-weight: 700;
+    margin: 0;
+}
+
+.champion-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.champion-pokemon {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.champion-pokemon.champion {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 215, 0, 0.1));
+    border: 2px solid rgba(255, 193, 7, 0.5);
+    transform: scale(1.02);
+}
+
+.champion-pokemon-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 200px;
+}
+
+.champion-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 3px;
+}
+
+.champion-name {
+    font-weight: 700;
+    color: #495057;
+    text-transform: capitalize;
+    margin: 0;
+}
+
+.champion-total {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.crown {
+    margin-left: 0.5rem;
+    font-size: 1.2rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-5px);
+    }
+
+    60% {
+        transform: translateY(-3px);
+    }
+}
+
+.champion-bar-wrapper {
+    flex: 1;
+}
+
+.champion-bar-bg {
+    height: 25px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.champion-bar-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 12px;
+    transition: width 0.8s ease;
+}
+
+.champion-bar-fill.champion-fill {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    animation: champion-glow 2s infinite;
+}
+
+@keyframes champion-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+    }
+}
+
+/* Battle Summary */
+.battle-summary {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05));
+    border-radius: 15px;
+    padding: 1.5rem;
+}
+
+.summary-title {
+    text-align: center;
+    color: #495057;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.summary-card {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.summary-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+}
+
+.summary-info h6 {
+    color: #495057;
+    font-weight: 700;
+    text-transform: capitalize;
+    margin-bottom: 0.25rem;
+}
+
+.summary-info p {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.win-percentage {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* ===============================
+   DARK MODE - MODERN DESIGN
+   =============================== */
+
+/* Dark mode stat comparison cards */
+.theme-dark .stat-comparison-card {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(26, 32, 44, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .stat-comparison-card:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    border-color: rgba(159, 122, 234, 0.3);
+}
+
+.theme-dark .stat-header {
+    border-bottom-color: rgba(159, 122, 234, 0.3);
+}
+
+.theme-dark .stat-name {
+    color: #f7fafc;
+}
+
+.theme-dark .winner-badge {
+    background: linear-gradient(135deg, #38a169, #2f855a);
+    color: #f7fafc;
+}
+
+.theme-dark .pokemon-mini-avatar {
+    background: rgba(159, 122, 234, 0.2);
+}
+
+.theme-dark .pokemon-name {
+    color: #e2e8f0;
+}
+
+.theme-dark .stat-bar-bg {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode stat-specific bar colors */
+.theme-dark .stat-bar-fill.stat-hp {
+    background: linear-gradient(135deg, #FF6B6B, #FF8A80);
+}
+
+.theme-dark .stat-bar-fill.stat-attack {
+    background: linear-gradient(135deg, #FFB366, #FFB74D);
+}
+
+.theme-dark .stat-bar-fill.stat-defense {
+    background: linear-gradient(135deg, #FFE066, #FFF176);
+}
+
+.theme-dark .stat-bar-fill.stat-special-attack {
+    background: linear-gradient(135deg, #74B9FF, #90CAF9);
+}
+
+.theme-dark .stat-bar-fill.stat-special-defense {
+    background: linear-gradient(135deg, #81C784, #A5D6A7);
+}
+
+.theme-dark .stat-bar-fill.stat-speed {
+    background: linear-gradient(135deg, #F48FB1, #F8BBD9);
+}
+
+.theme-dark .stat-bar-fill.winner {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+.theme-dark .stat-value {
+    color: #f7fafc;
+}
+
+/* Dark mode champion card */
+.theme-dark .overall-champion-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 193, 7, 0.1));
+    border-color: rgba(255, 193, 7, 0.4);
+}
+
+.theme-dark .champion-header h5 {
+    color: #f7fafc;
+}
+
+.theme-dark .champion-pokemon {
+    background: rgba(45, 55, 72, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .champion-pokemon.champion {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 215, 0, 0.15));
+    border-color: rgba(255, 193, 7, 0.6);
+}
+
+.theme-dark .champion-avatar {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .champion-name {
+    color: #f7fafc;
+}
+
+.theme-dark .champion-total {
+    color: #cbd5e0;
+}
+
+.theme-dark .champion-bar-bg {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode battle summary */
+.theme-dark .battle-summary {
+    background: linear-gradient(135deg, rgba(159, 122, 234, 0.15), rgba(128, 90, 213, 0.1));
+    border: 1px solid rgba(159, 122, 234, 0.2);
+}
+
+.theme-dark .summary-title {
+    color: #f7fafc;
+}
+
+.theme-dark .summary-card {
+    background: rgba(45, 55, 72, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .summary-card:hover {
+    background: rgba(55, 65, 82, 0.9);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .summary-info h6 {
+    color: #f7fafc;
+}
+
+.theme-dark .summary-info p {
+    color: #cbd5e0;
+}
+
+.theme-dark .win-percentage {
+    background: linear-gradient(135deg, #38a169, #2f855a);
+    color: #f7fafc;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stats-comparison-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .pokemon-stat-row {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .pokemon-info {
+        min-width: auto;
+        justify-content: center;
+    }
+
+    .champion-pokemon {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+
+    .champion-pokemon-info {
+        flex-direction: column;
+        min-width: auto;
+        text-align: center;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}

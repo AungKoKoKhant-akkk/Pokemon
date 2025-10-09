@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useComparison } from '../../context/ComparisonContext';
 import { usePokemonData } from '../../context/PokemonDataContext';
+import { useTheme } from '../../context/ThemeContext';
 import { getPokemonStatColor, getTotalStats, getAverageStats } from '../../utils';
 import { Link } from 'react-router-dom';
 import '../../styles/ComparisonStyles.css';
@@ -8,6 +9,7 @@ import '../../styles/ComparisonStyles.css';
 const PokemonComparison = () => {
     const { comparisonList, removeFromComparison, clearComparison, getComparisonCount } = useComparison();
     const { getPokemonDetails } = usePokemonData();
+    const { isDark } = useTheme();
     const [pokemonDetails, setPokemonDetails] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -53,7 +55,7 @@ const PokemonComparison = () => {
 
     if (comparisonList.length === 0) {
         return (
-            <div className="comparison-container">
+            <div className={`comparison-container ${isDark ? 'theme-dark' : ''}`}>
                 <div className="container py-5">
                     <div className="row justify-content-center">
                         <div className="col-lg-8">
@@ -110,7 +112,7 @@ const PokemonComparison = () => {
     }
 
     return (
-        <div className="comparison-container">
+        <div className={`comparison-container ${isDark ? 'theme-dark' : ''}`}>
             <div className="container py-4">
                 <div className="comparison-header">
                     <h1>
@@ -219,112 +221,136 @@ const PokemonComparison = () => {
                                     </div>
                                 ) : (
                                     <div>
-                                        {/* Head-to-Head Stats Table */}
-                                        <div className="table-responsive">
-                                            <table className="table table-hover">
-                                                <thead className="table-primary">
-                                                    <tr>
-                                                        <th scope="col" style={{ width: '200px' }}>Stat</th>
-                                                        {pokemonDetails.map((pokemon, index) => (
-                                                            <th key={index} scope="col" className="text-center text-capitalize">
-                                                                <div className="d-flex flex-column align-items-center">
-                                                                    <img
-                                                                        src={pokemon.sprites.front_default}
-                                                                        alt={pokemon.name}
-                                                                        style={{ width: '40px', height: '40px' }}
-                                                                    />
-                                                                    <strong>{pokemon.name}</strong>
-                                                                </div>
-                                                            </th>
-                                                        ))}
-                                                        <th scope="col" className="text-center">
-                                                            <div className="d-flex flex-column align-items-center">
-                                                                <div className="mb-2">
-                                                                    <span style={{ fontSize: '24px' }}>🏆</span>
-                                                                    <span style={{ fontSize: '20px' }}>👑</span>
-                                                                    <span style={{ fontSize: '24px' }}>🥇</span>
-                                                                </div>
-                                                                <strong>Winner</strong>
-                                                            </div>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {pokemonDetails[0]?.stats.map((stat, statIndex) => {
-                                                        const statValues = pokemonDetails.map(pokemon => ({
-                                                            name: pokemon.name,
-                                                            value: pokemon.stats[statIndex].base_stat
-                                                        }));
-                                                        const maxValue = Math.max(...statValues.map(s => s.value));
-                                                        const winner = statValues.find(s => s.value === maxValue);
-
-                                                        return (
-                                                            <tr key={statIndex}>
-                                                                <td className="fw-bold text-uppercase" style={{ fontSize: '14px' }}>
-                                                                    {stat.stat.name.replace('-', ' ')}
-                                                                </td>
-                                                                {statValues.map((statData, pokemonIndex) => (
-                                                                    <td key={pokemonIndex} className="text-center">
-                                                                        <div className={`p-2 rounded ${statData.value === maxValue ? 'bg-success text-white fw-bold' : 'bg-light'}`}>
-                                                                            <div className="fs-5">{statData.value}</div>
-                                                                            {statData.value === maxValue && (
-                                                                                <small>🏆 Best</small>
-                                                                            )}
-                                                                        </div>
-                                                                    </td>
-                                                                ))}
-                                                                <td className="text-center">
-                                                                    <div className="d-flex flex-column align-items-center">
-                                                                        <strong className="text-success text-capitalize">{winner.name}</strong>
-                                                                        <small className="text-muted">({winner.value})</small>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                    {/* Total Stats Row */}
-                                                    <tr className="table-warning">
-                                                        <td className="fw-bold">TOTAL STATS</td>
-                                                        {pokemonDetails.map((pokemon, index) => {
-                                                            const total = getTotalStats(pokemon);
-                                                            const maxTotal = Math.max(...pokemonDetails.map(p => getTotalStats(p)));
-                                                            return (
-                                                                <td key={index} className="text-center">
-                                                                    <div className={`p-2 rounded ${total === maxTotal ? 'bg-warning fw-bold' : 'bg-light'}`}>
-                                                                        <div className="fs-4">{total}</div>
-                                                                        {total === maxTotal && (
-                                                                            <small>👑 Strongest</small>
-                                                                        )}
-                                                                    </div>
-                                                                </td>
-                                                            );
-                                                        })}
-                                                        <td className="text-center">
-                                                            <strong className="text-warning">
-                                                                {pokemonDetails.find(p => getTotalStats(p) === Math.max(...pokemonDetails.map(p => getTotalStats(p)))).name}
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        {/* Quick Summary */}
-                                        <div className="mt-4 p-3 bg-info bg-opacity-10 rounded">
-                                            <h6 className="text-info">📊 Quick Summary:</h6>
-                                            {pokemonDetails.map((pokemon, index) => {
-                                                const wins = pokemonDetails[0]?.stats.filter((stat, statIndex) => {
-                                                    const statValues = pokemonDetails.map(p => p.stats[statIndex].base_stat);
-                                                    const maxValue = Math.max(...statValues);
-                                                    return pokemon.stats[statIndex].base_stat === maxValue;
-                                                }).length || 0;
+                                        {/* Modern Stats Comparison Cards */}
+                                        <div className="stats-comparison-grid">
+                                            {pokemonDetails[0]?.stats.map((stat, statIndex) => {
+                                                const statValues = pokemonDetails.map(pokemon => ({
+                                                    name: pokemon.name,
+                                                    value: pokemon.stats[statIndex].base_stat,
+                                                    pokemon: pokemon
+                                                }));
+                                                const maxValue = Math.max(...statValues.map(s => s.value));
+                                                const winner = statValues.find(s => s.value === maxValue);
 
                                                 return (
-                                                    <div key={index} className="mb-2">
-                                                        <strong className="text-capitalize">{pokemon.name}</strong> wins in <strong>{wins}</strong> stats
+                                                    <div key={statIndex} className="stat-comparison-card">
+                                                        <div className="stat-header">
+                                                            <h6 className="stat-name">
+                                                                {stat.stat.name === 'hp' && '💖'}
+                                                                {stat.stat.name === 'attack' && '⚔️'}
+                                                                {stat.stat.name === 'defense' && '🛡️'}
+                                                                {stat.stat.name === 'special-attack' && '✨'}
+                                                                {stat.stat.name === 'special-defense' && '🔮'}
+                                                                {stat.stat.name === 'speed' && '💨'}
+                                                                {' '}
+                                                                {stat.stat.name.replace('-', ' ').toUpperCase()}
+                                                            </h6>
+                                                            <div className="stat-winner">
+                                                                <span className="winner-badge">🏆 {winner.name}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="stat-bars">
+                                                            {statValues.map((statData, pokemonIndex) => (
+                                                                <div key={pokemonIndex} className="pokemon-stat-row">
+                                                                    <div className="pokemon-info">
+                                                                        <img
+                                                                            src={statData.pokemon.sprites.front_default}
+                                                                            alt={statData.name}
+                                                                            className="pokemon-mini-avatar"
+                                                                        />
+                                                                        <span className="pokemon-name">{statData.name}</span>
+                                                                    </div>
+                                                                    <div className="stat-bar-wrapper">
+                                                                        <div className="stat-bar-bg">
+                                                                            <div
+                                                                                className={`stat-bar-fill stat-${stat.stat.name} ${statData.value === maxValue ? 'winner' : ''}`}
+                                                                                style={{ width: `${(statData.value / maxValue) * 100}%` }}
+                                                                            >
+                                                                            </div>
+                                                                        </div>
+                                                                        <span className="stat-value">{statData.value}</span>
+                                                                        {statData.value === maxValue && <span className="best-indicator">🌟</span>}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 );
                                             })}
+                                        </div>
+
+                                        {/* Overall Champion Card */}
+                                        <div className="overall-champion-card mt-4">
+                                            <div className="champion-header">
+                                                <h5>🏆 Overall Stats Champion</h5>
+                                            </div>
+                                            <div className="champion-content">
+                                                {(() => {
+                                                    const maxTotal = Math.max(...pokemonDetails.map(p => getTotalStats(p)));
+                                                    return pokemonDetails.map((pokemon, index) => {
+                                                        const total = getTotalStats(pokemon);
+                                                        const isChampion = total === maxTotal;
+
+                                                        return (
+                                                            <div key={index} className={`champion-pokemon ${isChampion ? 'champion' : ''}`}>
+                                                                <div className="champion-pokemon-info">
+                                                                    <img
+                                                                        src={pokemon.sprites.front_default}
+                                                                        alt={pokemon.name}
+                                                                        className="champion-avatar"
+                                                                    />
+                                                                    <div className="champion-details">
+                                                                        <h6 className="champion-name">{pokemon.name}</h6>
+                                                                        <div className="champion-total">
+                                                                            Total: <strong>{total}</strong>
+                                                                            {isChampion && <span className="crown">👑</span>}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="champion-bar-wrapper">
+                                                                    <div className="champion-bar-bg">
+                                                                        <div
+                                                                            className={`champion-bar-fill ${isChampion ? 'champion-fill' : ''}`}
+                                                                            style={{ width: `${(total / maxTotal) * 100}%` }}
+                                                                        ></div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    });
+                                                })()}
+                                            </div>
+                                        </div>
+
+                                        {/* Battle Summary */}
+                                        <div className="battle-summary mt-4">
+                                            <h6 className="summary-title">⚔️ Battle Analysis</h6>
+                                            <div className="summary-grid">
+                                                {pokemonDetails.map((pokemon, index) => {
+                                                    const wins = pokemonDetails[0]?.stats.filter((stat, statIndex) => {
+                                                        const statValues = pokemonDetails.map(p => p.stats[statIndex].base_stat);
+                                                        const maxValue = Math.max(...statValues);
+                                                        return pokemon.stats[statIndex].base_stat === maxValue;
+                                                    }).length || 0;
+
+                                                    return (
+                                                        <div key={index} className="summary-card">
+                                                            <img
+                                                                src={pokemon.sprites.front_default}
+                                                                alt={pokemon.name}
+                                                                className="summary-avatar"
+                                                            />
+                                                            <div className="summary-info">
+                                                                <h6>{pokemon.name}</h6>
+                                                                <p>Dominates in <strong>{wins}</strong> stats</p>
+                                                                <div className="win-percentage">
+                                                                    Win Rate: {Math.round((wins / 6) * 100)}%
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
