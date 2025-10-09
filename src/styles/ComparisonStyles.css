@@ -1,0 +1,267 @@
+/* Pokemon Comparison Styles */
+
+.comparison-container {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.comparison-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.comparison-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.pokemon-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.pokemon-avatar {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.pokemon-avatar img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+
+.stat-bar-container {
+    margin-bottom: 1rem;
+}
+
+.stat-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+    text-transform: capitalize;
+}
+
+.stat-value {
+    font-weight: 700;
+    color: #212529;
+    font-size: 1rem;
+}
+
+.stat-progress {
+    height: 25px;
+    border-radius: 12px;
+    background-color: #e9ecef;
+    overflow: hidden;
+    position: relative;
+}
+
+.stat-progress-bar {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.6s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Stat Colors */
+.stat-hp { background: linear-gradient(135deg, #FF5959, #FF8A80); }
+.stat-attack { background: linear-gradient(135deg, #F5AC78, #FFB74D); }
+.stat-defense { background: linear-gradient(135deg, #FAE078, #FFF176); }
+.stat-special-attack { background: linear-gradient(135deg, #9DB7F5, #90CAF9); }
+.stat-special-defense { background: linear-gradient(135deg, #A7DB8D, #A5D6A7); }
+.stat-speed { background: linear-gradient(135deg, #FA92B2, #F48FB1); }
+
+.comparison-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.summary-stat {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.summary-stat h4 {
+    color: #ffd700;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.summary-stat p {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.abilities-container {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.ability-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    margin: 0.25rem;
+    display: inline-block;
+}
+
+.ability-badge.hidden {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+.comparison-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.comparison-header h1 {
+    color: #495057;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.comparison-header p {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.empty-comparison {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.empty-comparison i {
+    color: #667eea;
+    margin-bottom: 2rem;
+}
+
+.empty-comparison h2 {
+    color: #495057;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.empty-comparison p {
+    color: #6c757d;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.btn-pokemon-compare {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-pokemon-compare:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.comparison-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.comparison-counter {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .comparison-container {
+        padding: 1rem 0;
+    }
+    
+    .pokemon-header {
+        padding: 1rem;
+    }
+    
+    .pokemon-avatar {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .pokemon-avatar img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .comparison-summary {
+        padding: 1.5rem;
+    }
+    
+    .comparison-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .stat-progress {
+        height: 20px;
+    }
+    
+    .summary-stat {
+        padding: 0.75rem;
+    }
+}
