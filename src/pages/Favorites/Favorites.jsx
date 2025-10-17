@@ -17,10 +17,11 @@ const Favorites = () => {
         switch (sortBy) {
             case 'name':
                 return a.name.localeCompare(b.name);
-            case 'type':
+            case 'type': {
                 const aType = a.pokemonTypes?.[0] || 'normal';
                 const bType = b.pokemonTypes?.[0] || 'normal';
                 return aType.localeCompare(bType);
+            }
             case 'recent':
             default:
                 return new Date(b.addedAt) - new Date(a.addedAt);

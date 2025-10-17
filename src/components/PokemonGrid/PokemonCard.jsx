@@ -1,9 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// Context imports
 import { useFavorites } from '../../context/FavoritesContext';
 import { useComparison } from '../../context/ComparisonContext';
 import { useTheme } from '../../context/ThemeContext';
-import { getPokemonImageFallbacks } from '../../utils/imageUtils';
+
+// Utils
+import { getPokemonImageFallbacks } from '../../utils';
+
+// Styles
 import styles from './PokemonCard.module.css';
 
 const PokemonCard = ({ pokemon, index, feedback }) => {

@@ -19,9 +19,9 @@ export const PokemonDataProvider = ({ children }) => {
     const [isInitialized, setIsInitialized] = useState(false);
 
     // Cache for detailed Pokemon data
-    const [pokemonCache, setPokemonCache] = useState(new Map());
-    const [speciesCache, setSpeciesCache] = useState(new Map());
-    const [evolutionCache, setEvolutionCache] = useState(new Map());
+    const pokemonCache = new Map();
+    const speciesCache = new Map();
+    const evolutionCache = new Map();
 
     // Fetch initial data only once when context is created
     useEffect(() => {

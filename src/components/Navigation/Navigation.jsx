@@ -1,10 +1,18 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+
+// Context imports
 import { useComparison } from '../../context/ComparisonContext';
 import { useFavorites } from '../../context/FavoritesContext';
+
+// Component imports
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
+
+// Assets
+import { assets } from '../../assets';
+
+// Styles
 import './Navigation.css';
-import { assets } from "../../assets/image.js";
 
 const Navigation = () => {
     const location = useLocation();

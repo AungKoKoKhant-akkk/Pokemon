@@ -5,7 +5,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     const getVisiblePages = () => {
         const delta = 2; // Number of pages to show on each side of current page
         const range = [];
-        const rangeWithDots = [];
 
         // Always show first page
         const showFirst = currentPage > delta + 2;

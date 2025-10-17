@@ -106,7 +106,6 @@ export const PokemonQuizProvider = ({ children }) => {
             console.log('📦 Processing Pokemon with optimized strategy...');
 
             // Step 2: Fetch Pokemon details with limited concurrency (5 at a time)
-            const processedPokemon = [];
             const batchSize = 5;
 
             const results = await limitConcurrency(

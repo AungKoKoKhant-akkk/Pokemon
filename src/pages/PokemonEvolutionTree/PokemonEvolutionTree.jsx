@@ -1,21 +1,27 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../context/ThemeContext';
-import { getPokemonTypeColor, getPokemonStatColor, getStatRating, formatStatName, getStatPercentage, getOptimizedImageUrl, getPokemonImageFallbacks, getBestPokemonImage } from '../../utils';
+
+// Utils
+import {
+    getPokemonTypeColor,
+    getPokemonStatColor,
+    getStatRating,
+    formatStatName,
+    getStatPercentage,
+    getPokemonImageFallbacks,
+    getBestPokemonImage
+} from '../../utils';
+
+// Constants
+import { CACHE_EXPIRY } from '../../constants';
+
+// HTTP Client
 import axios from 'axios';
+
+// Styles
 import './PokemonEvolutionTree.css';
 
-// Enhanced cache with expiration and preloading
+// Enhanced cache with expiration
 const evolutionCache = new Map();
-const pokemonDataCache = new Map();
-const speciesCache = new Map();
-const CACHE_EXPIRY = 10 * 60 * 1000; // 10 minutes
-
-// Pre-populate cache with common Pokemon evolution chains
-const POPULAR_POKEMON = [
-    'pikachu', 'charmander', 'squirtle', 'bulbasaur', 'eevee',
-    'caterpie', 'weedle', 'pidgey', 'rattata', 'spearow'
-];
 
 // Simplified evolution data structure for faster processing
 const createSimplifiedPokemon = (name, id) => ({
@@ -29,11 +35,10 @@ const createSimplifiedPokemon = (name, id) => ({
 // Ultra-fast evolution chain parser (no additional API calls)
 const parseEvolutionChainFast = (chain) => {
     const parseNode = (node) => {
-        const pokemonId = node.species.url.split('/').slice(-2, -1)[0];
-        const pokemon = createSimplifiedPokemon(node.species.name, pokemonId);
+        const pokemon = createSimplifiedPokemon(node.species.name, node.species.url.split('/').slice(-2, -1)[0]);
         pokemon.evolutionDetails = node.evolution_details || [];
 
-        if (node.evolves_to && node.evolves_to.length > 0) {
+        if (node.evolves_to.length > 0) {
             pokemon.evolutions = node.evolves_to.map(parseNode);
         }
 
@@ -43,58 +48,10 @@ const parseEvolutionChainFast = (chain) => {
     return parseNode(chain);
 };
 
-// Preload popular Pokemon data in background (with error handling)
-const preloadPopularPokemon = async () => {
-    if (evolutionCache.size > 0) return; // Already preloaded
-
-    try {
-        console.log('🚀 Starting preload of popular Pokemon...');
-        const preloadPromises = POPULAR_POKEMON.map(async (pokemonName) => {
-            try {
-                const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`);
-                if (response.ok) {
-                    const species = await response.json();
-                    if (species.evolution_chain?.url) {
-                        const evolutionResponse = await fetch(species.evolution_chain.url);
-                        if (evolutionResponse.ok) {
-                            const evolutionData = await evolutionResponse.json();
-                            const chain = parseEvolutionChainFast(evolutionData.chain);
-                            evolutionCache.set(pokemonName, {
-                                data: chain,
-                                timestamp: Date.now()
-                            });
-                        }
-                    }
-                }
-            } catch (error) {
-                // Silently handle preload errors - they shouldn't break the app
-                console.debug(`Preload failed for ${pokemonName}:`, error.message);
-            }
-        });
-
-        await Promise.allSettled(preloadPromises);
-        console.log('✅ Preloaded popular Pokemon evolution chains');
-    } catch (error) {
-        // Silently handle preload errors
-        console.debug('Preload error:', error.message);
-    }
-};
-
-// Start preloading after the DOM is ready (safer)
-if (typeof window !== 'undefined') {
-    setTimeout(preloadPopularPokemon, 1000);
-}
-
-const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
-    const navigate = useNavigate();
-    const { isDark } = useTheme();
+const PokemonEvolutionTree = ({ pokemonName }) => {
     const [evolutionChain, setEvolutionChain] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [searchPokemon, setSearchPokemon] = useState(pokemonName || '');
-    const [loadingStage, setLoadingStage] = useState('');
-    const [showInstantPreview, setShowInstantPreview] = useState(false);
-    const [selectedPokemon, setSelectedPokemon] = useState(null);
     const [showPokemonModal, setShowPokemonModal] = useState(false);
     const [pokemonDetails, setPokemonDetails] = useState(null);
     const [modalLoading, setModalLoading] = useState(false);
@@ -114,40 +71,29 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                 return;
             }
 
-            setLoadingStage('🔍 Finding Pokemon...');
-
             // Use direct species API call (faster than pokemon -> species)
             let speciesUrl;
             try {
                 // Try species endpoint first (faster)
-                const speciesResponse = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonKey}`);
-                if (speciesResponse.ok) {
-                    const speciesData = await speciesResponse.json();
-                    speciesUrl = speciesData.evolution_chain.url;
-                } else {
+                const speciesResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemonKey}`);
+                const speciesData = speciesResponse.data;
+                speciesUrl = speciesData.evolution_chain.url;
+            } catch {
+                try {
                     // Fallback to pokemon endpoint
-                    setLoadingStage('🔄 Getting species data...');
-                    const pokemonResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonKey}`);
-                    if (!pokemonResponse.ok) throw new Error('Pokemon not found');
-
-                    const pokemonData = await pokemonResponse.json();
-                    const speciesResponse2 = await fetch(pokemonData.species.url);
-                    if (!speciesResponse2.ok) throw new Error('Species data not found');
-
-                    const speciesData = await speciesResponse2.json();
+                    const pokemonResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonKey}`);
+                    const pokemonData = pokemonResponse.data;
+                    const speciesResponse2 = await axios.get(pokemonData.species.url);
+                    const speciesData = speciesResponse2.data;
                     speciesUrl = speciesData.evolution_chain.url;
+                } catch {
+                    throw new Error('Pokemon not found');
                 }
-            } catch (err) {
-                throw new Error('Pokemon not found');
             }
 
-            setLoadingStage('⚡ Building evolution tree...');
-
             // Get evolution chain (this is usually fast)
-            const evolutionResponse = await fetch(speciesUrl);
-            if (!evolutionResponse.ok) throw new Error('Evolution data not found');
-
-            const evolutionData = await evolutionResponse.json();
+            const evolutionResponse = await axios.get(speciesUrl);
+            const evolutionData = evolutionResponse.data;
 
             // Fast parsing without additional API calls
             const chain = parseEvolutionChainFast(evolutionData.chain);
@@ -164,7 +110,6 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
             setError(err.message || 'Pokemon not found or evolution data unavailable');
         } finally {
             setLoading(false);
-            setLoadingStage('');
         }
     }, []);
 
@@ -172,22 +117,22 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
     const fetchPokemonDetails = useCallback(async (pokemonName) => {
         try {
             setModalLoading(true);
-            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`);
-            if (!response.ok) throw new Error('Pokemon not found');
-
-            const pokemonData = await response.json();
+            const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`);
+            const pokemonData = response.data;
 
             // Get species data for description
-            const speciesResponse = await fetch(pokemonData.species.url);
             let description = 'No description available';
-            if (speciesResponse.ok) {
-                const speciesData = await speciesResponse.json();
+            try {
+                const speciesResponse = await axios.get(pokemonData.species.url);
+                const speciesData = speciesResponse.data;
                 const englishEntry = speciesData.flavor_text_entries.find(
                     entry => entry.language.name === 'en'
                 );
                 if (englishEntry) {
                     description = englishEntry.flavor_text.replace(/\f/g, ' ').trim();
                 }
+            } catch (speciesError) {
+                console.debug('Could not fetch species description:', speciesError);
             }
 
             const details = {
@@ -203,7 +148,6 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
             };
 
             setPokemonDetails(details);
-            setSelectedPokemon(pokemonName);
             setShowPokemonModal(true);
         } catch (error) {
             console.error('Error fetching Pokemon details:', error);
@@ -215,14 +159,9 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
 
     // Handle Pokemon card click
     const handlePokemonClick = useCallback((pokemonName) => {
-        if (!isStandalone) {
-            // When embedded in detail page, show modal
-            fetchPokemonDetails(pokemonName);
-        } else {
-            // When standalone, navigate to detail page
-            navigate(`/pokemon/${pokemonName}`);
-        }
-    }, [isStandalone, fetchPokemonDetails, navigate]);
+        // When embedded in detail page, show modal
+        fetchPokemonDetails(pokemonName);
+    }, [fetchPokemonDetails]);
 
     // Get evolution trigger text (cached for performance)
     const getEvolutionTrigger = useCallback((details) => {
@@ -298,7 +237,7 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
     }, [evolutionChain]);
 
     // Render evolution tree with enhanced card design
-    const renderEvolutionNode = useCallback((pokemon, level = 0, isLast = false) => {
+    const renderEvolutionNode = useCallback((pokemon, level = 0) => {
         return (
             <div key={pokemon.name} className={`evolution-node level-${level}`}>
                 <div
@@ -338,12 +277,7 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                             </span>
                         </div>
 
-                        <div className="card-actions">
-                            <button className="btn btn-sm btn-primary card-action-btn">
-                                <i className="bi bi-eye me-1"></i>
-                                View Details
-                            </button>
-                        </div>
+
                     </div>
 
                     <div className="card-hover-overlay">
@@ -354,10 +288,10 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
 
                 {pokemon.evolutions && pokemon.evolutions.length > 0 && (
                     <div className="evolution-children">
-                        {pokemon.evolutions.map((evolution, index) => (
+                        {pokemon.evolutions.map((evolution) => (
                             <div key={evolution.name} className="evolution-branch">
                                 <div className="evolution-line"></div>
-                                {renderEvolutionNode(evolution, level + 1, index === pokemon.evolutions.length - 1)}
+                                {renderEvolutionNode(evolution, level + 1)}
                             </div>
                         ))}
                     </div>
@@ -366,87 +300,12 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
         );
     }, [handlePokemonClick, getOptimizedImageUrl]);
 
-    // Debounced search with instant preview
-    const [searchTimeout, setSearchTimeout] = useState(null);
-
-    const debouncedSearch = useCallback((searchTerm) => {
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
-        }
-
-        // Show instant preview for popular Pokemon
-        const lowerTerm = searchTerm.toLowerCase();
-        if (POPULAR_POKEMON.includes(lowerTerm)) {
-            const cached = evolutionCache.get(lowerTerm);
-            if (cached) {
-                setEvolutionChain(cached.data);
-                setShowInstantPreview(true);
-                setLoading(false);
-            }
-        }
-
-        const timeout = setTimeout(() => {
-            if (searchTerm.trim()) {
-                setShowInstantPreview(false);
-                fetchEvolutionChain(searchTerm.trim());
-            }
-        }, 300); // Reduced delay for faster response
-
-        setSearchTimeout(timeout);
-    }, [fetchEvolutionChain, searchTimeout]);
-
-    // Handle search submission (immediate, no debounce)
-    const handleSearch = (e) => {
-        e.preventDefault();
-        if (searchPokemon.trim()) {
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-            setShowInstantPreview(false);
-            fetchEvolutionChain(searchPokemon.trim());
-        }
-    };
-
-    // Handle input change with instant preview
-    const handleSearchInputChange = (e) => {
-        const value = e.target.value;
-        setSearchPokemon(value);
-
-        // Show instant results for popular Pokemon (no delay)
-        const lowerValue = value.toLowerCase();
-        if (POPULAR_POKEMON.includes(lowerValue)) {
-            const cached = evolutionCache.get(lowerValue);
-            if (cached) {
-                setEvolutionChain(cached.data);
-                setShowInstantPreview(true);
-                setLoading(false);
-                setError(null);
-                return;
-            }
-        }
-
-        // Auto-search for other Pokemon (with shorter delay)
-        if (value.length >= 3) {
-            setLoading(true);
-            debouncedSearch(value);
-        }
-    };
-
     // Initialize component
     useEffect(() => {
         if (pokemonName) {
             fetchEvolutionChain(pokemonName);
         }
     }, [pokemonName, fetchEvolutionChain]);
-
-    // Cleanup timeout on unmount
-    useEffect(() => {
-        return () => {
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-        };
-    }, [searchTimeout]);
 
     if (loading) {
         return (
@@ -463,14 +322,11 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                         </div>
                     </div>
                     <h4 className="mt-3">Loading Evolution Tree...</h4>
-                    {loadingStage && (
-                        <p className="text-muted mt-2">{loadingStage}</p>
-                    )}
                     <div className="progress mt-3" style={{ width: '300px', margin: '0 auto' }}>
                         <div
                             className="progress-bar progress-bar-striped progress-bar-animated"
                             role="progressbar"
-                            style={{ width: loadingStage.includes('Fetching') ? '33%' : loadingStage.includes('Loading') ? '66%' : '100%' }}
+                            style={{ width: '100%' }}
                         ></div>
                     </div>
                 </div>
@@ -480,45 +336,6 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
 
     return (
         <div className="evolution-tree-container">
-            {isStandalone && (
-                <div className="evolution-header">
-                    <div className="container">
-                        <div className="row">
-                            <div className="col-md-8 mx-auto">
-                                <h2 className="text-center mb-4">
-                                    <i className="bi bi-diagram-3 me-2"></i>
-                                    Pokemon Evolution Tree
-                                </h2>
-
-                                {/* Search Form */}
-                                <form onSubmit={handleSearch} className="search-form mb-4">
-                                    <div className="input-group">
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="Enter Pokemon name (e.g., Charmander, Pikachu)"
-                                            value={searchPokemon}
-                                            onChange={handleSearchInputChange}
-                                            disabled={loading}
-                                        />
-                                        <button className="btn btn-primary" type="submit" disabled={loading || !searchPokemon.trim()}>
-                                            <i className="bi bi-search me-2"></i>
-                                            {loading ? 'Loading...' : 'View Evolution Tree'}
-                                        </button>
-                                    </div>
-                                    {searchPokemon.length >= 3 && searchPokemon.length < 30 && (
-                                        <small className="text-muted mt-2 d-block">
-                                            <i className="bi bi-info-circle me-1"></i>
-                                            Auto-searching as you type...
-                                        </small>
-                                    )}
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {error && (
                 <div className="alert alert-warning text-center">
                     <i className="bi bi-exclamation-triangle me-2"></i>
@@ -528,19 +345,10 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
 
             {evolutionChain && (
                 <div className="evolution-tree">
-                    {showInstantPreview && (
-                        <div className="alert alert-info alert-dismissible fade show mb-3" role="alert">
-                            <i className="bi bi-lightning-fill me-2"></i>
-                            <strong>Instant Preview!</strong> This evolution tree was loaded from cache for super-fast viewing.
-                            <button type="button" className="btn-close" onClick={() => setShowInstantPreview(false)}></button>
-                        </div>
-                    )}
-
                     <div className="evolution-tree-title">
                         <h4>
                             <i className="bi bi-arrow-up-right me-2"></i>
                             Evolution Chain for {evolutionChain.name}
-                            {showInstantPreview && <span className="badge bg-success ms-2">⚡ Instant</span>}
                         </h4>
                     </div>
 
@@ -582,39 +390,6 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                             </div>
                         </div>
                     )}
-                </div>
-            )}
-
-            {!evolutionChain && !loading && !error && isStandalone && (
-                <div className="text-center py-5">
-                    <i className="bi bi-diagram-3" style={{ fontSize: '4rem', color: '#6c757d' }}></i>
-                    <h4 className="text-muted mt-3">Search for a Pokemon to view its evolution tree</h4>
-                    <p className="text-muted">Enter any Pokemon name above to explore its evolutionary journey</p>
-
-                    <div className="row mt-4">
-                        <div className="col-md-8 offset-md-2">
-                            <div className="card bg-light">
-                                <div className="card-body">
-                                    <h6 className="card-title">⚡ Instant Loading Available!</h6>
-                                    <p className="card-text small mb-2">Try these popular Pokemon for super-fast results:</p>
-                                    <div className="d-flex flex-wrap justify-content-center gap-2">
-                                        {POPULAR_POKEMON.slice(0, 5).map(pokemon => (
-                                            <button
-                                                key={pokemon}
-                                                className="btn btn-outline-primary btn-sm"
-                                                onClick={() => {
-                                                    setSearchPokemon(pokemon);
-                                                    handleSearchInputChange({ target: { value: pokemon } });
-                                                }}
-                                            >
-                                                {pokemon}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             )}
 
@@ -730,7 +505,7 @@ const PokemonEvolutionTree = ({ pokemonName, isStandalone = false }) => {
                                                             Abilities
                                                         </h6>
                                                         <div className="abilities-list">
-                                                            {pokemonDetails.abilities.map((ability, index) => (
+                                                            {pokemonDetails.abilities.map((ability) => (
                                                                 <div key={ability.ability.name} className="ability-item">
                                                                     <span className={`ability-badge ${ability.is_hidden ? 'hidden-ability' : 'normal-ability'}`}>
                                                                         {ability.ability.name.replace('-', ' ').toUpperCase()}

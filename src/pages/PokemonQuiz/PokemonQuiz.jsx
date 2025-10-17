@@ -1,35 +1,55 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// Context imports
 import { useTheme } from '../../context/ThemeContext';
-import { usePokemonQuizData, useQuizQuestion, useQuizStats } from '../../hooks/usePokemonQuiz';
+import { usePokemonQuiz } from '../../context/PokemonQuizContext';
+
+// Constants
+import { GAME_MODES, DIFFICULTY_LEVELS } from '../../constants';
+
+// Styles
 import './PokemonQuiz.css';
-
-const GAME_MODES = {
-    IMAGE: 'image',
-    DESCRIPTION: 'description',
-    TYPE: 'type',
-    SILHOUETTE: 'silhouette'
-};
-
-const DIFFICULTY_LEVELS = {
-    EASY: { name: 'Easy', questionsCount: 5, timeLimit: 20 },
-    MEDIUM: { name: 'Medium', questionsCount: 10, timeLimit: 15 },
-    HARD: { name: 'Hard', questionsCount: 15, timeLimit: 10 }
-};
 
 const PokemonQuiz = () => {
     const navigate = useNavigate();
     const { isDark } = useTheme();
     const {
-        pokemon: quizPokemon,
+        quizPokemon,
         isLoading,
         loadingProgress,
         error,
-        count: pokemonCount
-    } = usePokemonQuizData();
+        getRandomPokemon
+    } = usePokemonQuiz();
 
-    const { generateQuestion } = useQuizQuestion();
-    const { calculateScore, calculateTimeBonus } = useQuizStats();
+    // Helper functions
+    const generateQuestion = useCallback(() => {
+        if (!quizPokemon.length) return null;
+
+        const randomPokemon = getRandomPokemon(4);
+        if (!randomPokemon.length) return null;
+
+        const correctAnswer = randomPokemon[0];
+        const options = randomPokemon.map(p => p.name);
+
+        return { correctAnswer, options };
+    }, [quizPokemon, getRandomPokemon]);
+
+    const calculateTimeBonus = useCallback((timeLeft, timeLimit) => {
+        return Math.round((timeLeft / timeLimit) * 100);
+    }, []);
+
+    const calculateScore = useCallback((correct, total, timeBonus) => {
+        const accuracy = total > 0 ? (correct / total) * 100 : 0;
+        const baseScore = correct * 100;
+        const bonusScore = timeBonus;
+        return {
+            accuracy: Math.round(accuracy),
+            baseScore,
+            bonusScore,
+            totalScore: baseScore + bonusScore
+        };
+    }, []);
 
     // Game state
     const [gameState, setGameState] = useState('menu'); // menu, playing, gameOver
@@ -191,16 +211,6 @@ const PokemonQuiz = () => {
         setSelectedAnswer('');
         setShowResult(false);
         setCurrentQuestion(null);
-    };
-
-    // Get difficulty color
-    const getDifficultyColor = (level) => {
-        switch (level) {
-            case 'EASY': return 'success';
-            case 'MEDIUM': return 'warning';
-            case 'HARD': return 'danger';
-            default: return 'primary';
-        }
     };
 
     if (isLoading || quizPokemon.length === 0) {

@@ -16,11 +16,6 @@ const TypeFilter = ({
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { isDark } = useTheme();
 
-    const clearAllFilters = () => {
-        onTypeFilter('All');
-        // Note: Would need search context to clear search term
-    };
-
     return (
         <div className="row mb-4">
             <div className="col-12">

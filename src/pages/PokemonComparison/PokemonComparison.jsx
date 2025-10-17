@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useComparison } from '../../context/ComparisonContext';
 import { usePokemonData } from '../../context/PokemonDataContext';
 import { useTheme } from '../../context/ThemeContext';
-import { getPokemonStatColor, getTotalStats, getAverageStats } from '../../utils';
+import { getTotalStats, getAverageStats } from '../../utils';
 import { Link } from 'react-router-dom';
 import '../../styles/ComparisonStyles.css';
 
@@ -32,25 +32,11 @@ const PokemonComparison = () => {
             const details = await Promise.all(promises);
             const validDetails = details.filter(detail => detail !== null);
             setPokemonDetails(validDetails);
-        } catch (err) {
+        } catch (error) {
             setError('Failed to fetch Pokemon details');
         } finally {
             setLoading(false);
         }
-    };
-
-    const getStatColor = getPokemonStatColor;
-
-    const getMaxStatValue = (statName) => {
-        if (pokemonDetails.length === 0) return 100;
-        return Math.max(...pokemonDetails.map(pokemon =>
-            pokemon.stats.find(stat => stat.stat.name === statName)?.base_stat || 0
-        ));
-    };
-
-    const calculateStatPercentage = (value, statName) => {
-        const maxValue = getMaxStatValue(statName);
-        return Math.max((value / maxValue) * 100, 5); // Minimum 5% for visibility
     };
 
     if (comparisonList.length === 0) {
@@ -141,7 +127,7 @@ const PokemonComparison = () => {
 
                 {/* Pokemon Overview Cards */}
                 <div className="row mb-5">
-                    {pokemonDetails.map((pokemon, index) => (
+                    {pokemonDetails.map((pokemon) => (
                         <div key={pokemon.id} className={`col-lg-${12 / pokemonDetails.length} col-md-6 mb-3`}>
                             <div className="card h-100 border-0 shadow-sm">
                                 <div className="card-header bg-primary text-white text-center">
@@ -371,7 +357,7 @@ const PokemonComparison = () => {
                             </div>
                             <div className="card-body">
                                 <div className="row">
-                                    {pokemonDetails.map((pokemon, index) => (
+                                    {pokemonDetails.map((pokemon) => (
                                         <div key={pokemon.id} className={`col-lg-${12 / pokemonDetails.length} col-md-6 mb-3`}>
                                             <h6 className="text-capitalize mb-3">{pokemon.name}</h6>
                                             {pokemon.abilities.map((ability, abilityIndex) => (
@@ -405,7 +391,7 @@ const PokemonComparison = () => {
                             </div>
                             <div className="card-body">
                                 <div className="row">
-                                    {pokemonDetails.map((pokemon, index) => {
+                                    {pokemonDetails.map((pokemon) => {
                                         // Get type effectiveness (this is a simplified version)
                                         const getTypeWeaknesses = (types) => {
                                             const typeChart = {

@@ -3,7 +3,7 @@ import { useTheme } from '../../context/ThemeContext';
 import './ThemeToggle.css';
 
 const ThemeToggle = ({ className = '', size = 'normal' }) => {
-    const { theme, toggleTheme, isDark } = useTheme();
+    const { toggleTheme, isDark } = useTheme();
 
     const getSizeClass = () => {
         switch (size) {

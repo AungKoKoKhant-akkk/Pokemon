@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../context/FavoritesContext';
+import { useComparison } from '../../context/ComparisonContext';
 import { usePokemonData } from '../../context/PokemonDataContext';
-import { getPokemonTypeColor, formatStatName, getStatPercentage, formatPokemonId, getBestPokemonImage } from '../../utils';
+import { useTheme } from '../../context/ThemeContext';
+import { getPokemonTypeColor, formatPokemonId, getBestPokemonImage } from '../../utils';
 import PokemonEvolutionTree from '../PokemonEvolutionTree/PokemonEvolutionTree';
+import './PokemonDetail.css';
 
 const PokemonDetail = () => {
     const { name } = useParams();
     const navigate = useNavigate();
     const { toggleFavorite, isFavorite } = useFavorites();
+    const { addToComparison, removeFromComparison, isInComparison, canAddMore } = useComparison();
     const { getPokemonDetails, getPokemonSpecies, getEvolutionChain } = usePokemonData();
+    const { isDark } = useTheme();
     const [pokemon, setPokemon] = useState(null);
     const [species, setSpecies] = useState(null);
     const [evolutionChain, setEvolutionChain] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [favoriteActionFeedback, setFavoriteActionFeedback] = useState(null);
+    const [comparisonActionFeedback, setComparisonActionFeedback] = useState(null);
     const [showEvolutionTree, setShowEvolutionTree] = useState(false);
 
     // Handle favorite toggle with feedback
@@ -45,6 +51,40 @@ const PokemonDetail = () => {
         setTimeout(() => {
             setFavoriteActionFeedback(null);
         }, 3000);
+    };
+
+    // Handle comparison toggle with feedback
+    const handleComparisonToggle = () => {
+        if (!pokemon) return;
+
+        const pokemonData = {
+            name: pokemon.name,
+            image: getBestPokemonImage(pokemon),
+            type: `Type : ${pokemon.types.map(type => type.type.name).join(', ')}`,
+            description: `Power: ${pokemon.stats.find(stat => stat.stat.name === 'attack')?.base_stat || 'N/A'}`,
+            pokemonTypes: pokemon.types.map(type => type.type.name),
+            url: `https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`
+        };
+
+        let result;
+        if (isInComparison(pokemon.name)) {
+            result = removeFromComparison(pokemon.name);
+        } else if (canAddMore()) {
+            result = addToComparison(pokemonData);
+        } else {
+            result = { success: false, message: 'Maximum 3 Pokemon can be compared at once' };
+        }
+
+        if (result) {
+            setComparisonActionFeedback({
+                message: result.message,
+                type: result.success ? 'success' : 'error'
+            });
+
+            setTimeout(() => {
+                setComparisonActionFeedback(null);
+            }, 3000);
+        }
     };
 
     // Scroll to top when component mounts
@@ -133,7 +173,7 @@ const PokemonDetail = () => {
     }
 
     return (
-        <div className="container my-5">
+        <div className={`container my-5 ${isDark ? 'theme-dark' : ''}`}>
             {/* Favorites Action Feedback Toast */}
             {favoriteActionFeedback && (
                 <div className="position-fixed top-0 start-50 translate-middle-x" style={{ zIndex: 1050, marginTop: '20px' }}>
@@ -152,27 +192,74 @@ const PokemonDetail = () => {
                 </div>
             )}
 
-            {/* Back Button and Favorite Button */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <button className="btn btn-outline-primary" onClick={() => navigate(-1)}>
+            {/* Comparison Action Feedback Toast */}
+            {comparisonActionFeedback && (
+                <div className="position-fixed top-0 start-50 translate-middle-x" style={{
+                    zIndex: 1049,
+                    marginTop: favoriteActionFeedback ? '80px' : '20px'
+                }}>
+                    <div className={`alert alert-dismissible fade show ${comparisonActionFeedback.type === 'success' ? 'alert-info' : 'alert-warning'
+                        }`} role="alert">
+                        <i className={`bi ${comparisonActionFeedback.type === 'success' ? 'bi-bar-chart-fill' : 'bi-exclamation-triangle'
+                            } me-2`}></i>
+                        {comparisonActionFeedback.message}
+                        <button
+                            type="button"
+                            className="btn-close"
+                            onClick={() => setComparisonActionFeedback(null)}
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                </div>
+            )}
+
+            {/* Back Button and Action Buttons */}
+            <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <button className="btn btn-outline-primary" onClick={() => navigate('/')}>
                     <i className="bi bi-arrow-left me-2"></i>
                     Back to Pokemon List
                 </button>
 
-                <button
-                    className={`btn ${isFavorite(pokemon.name)
-                        ? 'btn-danger'
-                        : 'btn-outline-danger'
-                        }`}
-                    onClick={handleFavoriteToggle}
-                    title={isFavorite(pokemon.name) ? 'Remove from favorites' : 'Add to favorites'}
-                >
-                    <i className={`bi ${isFavorite(pokemon.name)
-                        ? 'bi-heart-fill'
-                        : 'bi-heart'
-                        } me-2`}></i>
-                    {isFavorite(pokemon.name) ? 'Remove from Favorites' : 'Add to Favorites'}
-                </button>
+                <div className="d-flex gap-2 flex-wrap">
+                    <button
+                        className={`btn ${isInComparison(pokemon.name)
+                            ? 'btn-warning'
+                            : canAddMore()
+                                ? 'btn-outline-info'
+                                : 'btn-outline-secondary'
+                            }`}
+                        onClick={handleComparisonToggle}
+                        title={
+                            isInComparison(pokemon.name)
+                                ? 'Remove from comparison'
+                                : canAddMore()
+                                    ? 'Add to comparison'
+                                    : 'Comparison limit reached'
+                        }
+                        disabled={!isInComparison(pokemon.name) && !canAddMore()}
+                    >
+                        <i className={`bi ${isInComparison(pokemon.name)
+                            ? 'bi-bar-chart-fill'
+                            : 'bi-bar-chart'
+                            } me-2`}></i>
+                        {isInComparison(pokemon.name) ? 'Remove from Comparison' : 'Add to Comparison'}
+                    </button>
+
+                    <button
+                        className={`btn ${isFavorite(pokemon.name)
+                            ? 'btn-danger'
+                            : 'btn-outline-danger'
+                            }`}
+                        onClick={handleFavoriteToggle}
+                        title={isFavorite(pokemon.name) ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                        <i className={`bi ${isFavorite(pokemon.name)
+                            ? 'bi-heart-fill'
+                            : 'bi-heart'
+                            } me-2`}></i>
+                        {isFavorite(pokemon.name) ? 'Remove from Favorites' : 'Add to Favorites'}
+                    </button>
+                </div>
             </div>
 
             {/* Pokemon Header */}
@@ -247,13 +334,122 @@ const PokemonDetail = () => {
                                 </ul>
                             </div>
                             {species && species.flavor_text_entries && (
-                                <div>
+                                <div className="mb-3">
                                     <strong>Description:</strong>
                                     <p className="mb-0 small">
                                         {species.flavor_text_entries
                                             .find(entry => entry.language.name === 'en')?.flavor_text
                                             .replace(/\f/g, ' ') || 'No description available'}
                                     </p>
+                                </div>
+                            )}
+
+                            {/* Evolution Information */}
+                            {evolutionChain && (
+                                <div className="mb-3">
+                                    <strong>Evolution Chain:</strong>
+                                    <div className="evolution-chain mt-2">
+                                        {(() => {
+                                            const evolutions = [];
+                                            let current = evolutionChain.chain;
+
+                                            // Build evolution array
+                                            while (current) {
+                                                evolutions.push({
+                                                    name: current.species.name,
+                                                    minLevel: current.evolution_details[0]?.min_level || null,
+                                                    trigger: current.evolution_details[0]?.trigger?.name || null,
+                                                    item: current.evolution_details[0]?.item?.name || null
+                                                });
+                                                current = current.evolves_to[0];
+                                            }
+
+                                            return (
+                                                <div className="d-flex flex-wrap align-items-center gap-2">
+                                                    {evolutions.map((evo, index) => (
+                                                        <React.Fragment key={evo.name}>
+                                                            <div className="text-center">
+                                                                <div
+                                                                    className={`badge px-3 py-2 text-capitalize ${evo.name === pokemon.name.toLowerCase()
+                                                                        ? 'bg-primary text-white'
+                                                                        : 'bg-light text-dark border'
+                                                                        }`}
+                                                                    style={{
+                                                                        fontSize: '0.8rem',
+                                                                        cursor: evo.name !== pokemon.name.toLowerCase() ? 'pointer' : 'default'
+                                                                    }}
+                                                                    onClick={async () => {
+                                                                        if (evo.name !== pokemon.name.toLowerCase()) {
+                                                                            // Try to get cached data first
+                                                                            const cachedPokemon = await getPokemonDetails(evo.name);
+                                                                            const cachedSpecies = await getPokemonSpecies(evo.name);
+                                                                            const cachedEvolution = await getEvolutionChain(cachedSpecies.evolution_chain.url);
+                                                                            setPokemon(cachedPokemon);
+                                                                            setSpecies(cachedSpecies);
+                                                                            setEvolutionChain(cachedEvolution);
+                                                                            // Do NOT set loading, do NOT navigate
+                                                                        }
+                                                                    }}
+                                                                    title={evo.name !== pokemon.name.toLowerCase() ? `Click to view ${evo.name} details` : 'Current Pokemon'}
+                                                                >
+                                                                    {evo.name}
+                                                                    {evo.name === pokemon.name.toLowerCase() && (
+                                                                        <i className="bi bi-star-fill ms-1 text-warning"></i>
+                                                                    )}
+                                                                </div>
+                                                                {evo.minLevel && (
+                                                                    <small className="text-muted d-block">Lv. {evo.minLevel}</small>
+                                                                )}
+                                                                {evo.item && (
+                                                                    <small className="text-muted d-block">{evo.item}</small>
+                                                                )}
+                                                            </div>
+
+                                                            {index < evolutions.length - 1 && (
+                                                                <div className="evolution-arrow">
+                                                                    <i className="bi bi-arrow-right text-primary" style={{ fontSize: '1.2rem' }}></i>
+                                                                </div>
+                                                            )}
+                                                        </React.Fragment>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+
+                                    {/* Evolution Stage Info */}
+                                    <div className="mt-2">
+                                        <small className="text-muted">
+                                            {(() => {
+                                                let current = evolutionChain.chain;
+                                                let stage = 1;
+
+                                                while (current) {
+                                                    if (current.species.name === pokemon.name.toLowerCase()) {
+                                                        break;
+                                                    }
+                                                    if (current.evolves_to.length > 0) {
+                                                        stage++;
+                                                        current = current.evolves_to[0];
+                                                    } else {
+                                                        break;
+                                                    }
+                                                }
+
+                                                const totalStages = (() => {
+                                                    let count = 1;
+                                                    let temp = evolutionChain.chain;
+                                                    while (temp.evolves_to.length > 0) {
+                                                        count++;
+                                                        temp = temp.evolves_to[0];
+                                                    }
+                                                    return count;
+                                                })();
+
+                                                return `Evolution Stage: ${stage} of ${totalStages}`;
+                                            })()}
+                                        </small>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -359,7 +555,7 @@ const PokemonDetail = () => {
                         </div>
                         {showEvolutionTree && (
                             <div className="card-body p-0">
-                                <PokemonEvolutionTree pokemonName={pokemon.name} isStandalone={false} />
+                                <PokemonEvolutionTree pokemonName={pokemon.name} />
                             </div>
                         )}
                         {!showEvolutionTree && (
