@@ -5,7 +5,7 @@ import { useComparison } from '../../context/ComparisonContext';
 import { usePokemonData } from '../../context/PokemonDataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { getPokemonTypeColor, formatPokemonId, getBestPokemonImage } from '../../utils';
-import PokemonEvolutionTree from '../PokemonEvolutionTree/PokemonEvolutionTree';
+// Removed PokemonEvolutionTree import
 import './PokemonDetail.css';
 
 const PokemonDetail = () => {
@@ -22,7 +22,7 @@ const PokemonDetail = () => {
     const [error, setError] = useState(null);
     const [favoriteActionFeedback, setFavoriteActionFeedback] = useState(null);
     const [comparisonActionFeedback, setComparisonActionFeedback] = useState(null);
-    const [showEvolutionTree, setShowEvolutionTree] = useState(false);
+    // Removed showEvolutionTree state
 
     // Handle favorite toggle with feedback
     const handleFavoriteToggle = () => {
@@ -136,7 +136,8 @@ const PokemonDetail = () => {
             evolutions.push({
                 name: current.species.name,
                 minLevel: current.evolution_details[0]?.min_level || null,
-                trigger: current.evolution_details[0]?.trigger?.name || null
+                trigger: current.evolution_details[0]?.trigger?.name || null,
+                image: `https://img.pokemondb.net/artwork/large/${current.species.name}.jpg`
             });
             current = current.evolves_to[0];
         }
@@ -508,10 +509,11 @@ const PokemonDetail = () => {
                                         <React.Fragment key={evolution.name}>
                                             <div className="text-center mx-3 mb-3">
                                                 <div
-                                                    className={`border rounded p-3 ${evolution.name === pokemon.name ? 'border-primary bg-light' : 'border-secondary'}`}
+                                                    className="border rounded p-3 border-secondary bg-light"
                                                     style={{ minWidth: '120px' }}
                                                 >
-                                                    <h6 className="text-capitalize mb-2">{evolution.name}</h6>
+                                                    <img src={evolution.image} alt={evolution.name} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                                                    <h6 className="text-capitalize mb-2 mt-2">{evolution.name}</h6>
                                                     {evolution.minLevel && (
                                                         <small className="text-muted">Level {evolution.minLevel}</small>
                                                     )}
@@ -535,38 +537,7 @@ const PokemonDetail = () => {
             )}
 
             {/* Evolution Tree Section */}
-            <div className="row mb-4">
-                <div className="col-12">
-                    <div className="card shadow-lg">
-                        <div className="card-header bg-gradient" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                            <div className="d-flex justify-content-between align-items-center">
-                                <h4 className="mb-0 text-white">
-                                    <i className="bi bi-diagram-3 me-2"></i>
-                                    Evolution Tree
-                                </h4>
-                                <button
-                                    className="btn btn-light btn-sm"
-                                    onClick={() => setShowEvolutionTree(!showEvolutionTree)}
-                                >
-                                    <i className={`bi ${showEvolutionTree ? 'bi-eye-slash' : 'bi-eye'} me-2`}></i>
-                                    {showEvolutionTree ? 'Hide' : 'Show'} Tree
-                                </button>
-                            </div>
-                        </div>
-                        {showEvolutionTree && (
-                            <div className="card-body p-0">
-                                <PokemonEvolutionTree pokemonName={pokemon.name} />
-                            </div>
-                        )}
-                        {!showEvolutionTree && (
-                            <div className="card-body text-center py-4">
-                                <i className="bi bi-diagram-3" style={{ fontSize: '3rem', color: '#6c757d' }}></i>
-                                <p className="text-muted mt-2 mb-0">Click "Show Tree" to explore {pokemon.name}'s evolution chain</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+            {/* Evolution Tree Section removed */}
 
             {/* Sprites Gallery */}
             <div className="row">
