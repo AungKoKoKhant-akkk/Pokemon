@@ -15,7 +15,7 @@ import './PokemonQuiz.css';
 const PokemonQuiz = () => {
     const navigate = useNavigate();
     const { isDark } = useTheme();
-    const { t, language, getPokemonName } = useLanguage();
+    const { t, language, getPokemonName, getTypeName } = useLanguage();
     const {
         quizPokemon,
         isLoading,
@@ -108,24 +108,34 @@ const PokemonQuiz = () => {
 
         switch (gameMode) {
             case GAME_MODES.IMAGE:
-                prompt = "Which Pokemon is this?";
+                prompt = t('quiz_prompt_image') || 'Which Pokemon is this?';
                 visual = correctAnswer.image;
                 break;
             case GAME_MODES.DESCRIPTION:
-                prompt = `This Pokemon has type: ${correctAnswer.types.join(', ')}. Which Pokemon is it?`;
+                {
+                    const typeNames = (correctAnswer.types || []).map(getTypeName).join(', ');
+                    prompt = t('quiz_prompt_description_prefix')
+                        ? `${t('quiz_prompt_description_prefix')} ${typeNames}. ${t('quiz_prompt_suffix')}`
+                        : `This Pokemon has type: ${typeNames}. Which Pokemon is it?`;
+                }
                 visual = null;
                 break;
             case GAME_MODES.TYPE:
-                prompt = `Which Pokemon has the type: ${correctAnswer.types[0]}?`;
+                {
+                    const typeName = getTypeName(correctAnswer.types?.[0] || '');
+                    prompt = t('quiz_prompt_type_prefix')
+                        ? `${t('quiz_prompt_type_prefix')} ${typeName}?`
+                        : `Which Pokemon has the type: ${typeName}?`;
+                }
                 visual = null;
                 break;
             case GAME_MODES.SILHOUETTE:
-                prompt = "Can you identify this Pokemon from its silhouette?";
+                prompt = t('quiz_prompt_silhouette') || 'Can you identify this Pokemon from its silhouette?';
                 visual = correctAnswer.image;
                 isSilhouette = true;
                 break;
             default:
-                prompt = "Which Pokemon is this?";
+                prompt = t('quiz_prompt_image') || 'Which Pokemon is this?';
                 visual = correctAnswer.image;
         }
 
@@ -232,8 +242,8 @@ const PokemonQuiz = () => {
                         <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }}>
                             <span className="visually-hidden">Loading...</span>
                         </div>
-                        <h4>Loading Pokemon Quiz...</h4>
-                        <p className="text-muted">Preparing your Pokemon adventure!</p>
+                        <h4>{t('quiz_loading_title') || 'Loading Pokemon Quiz...'}</h4>
+                        <p className="text-muted">{t('quiz_loading_subtitle') || 'Preparing your Pokemon adventure!'}</p>
 
                         {/* Loading Progress */}
                         {loadingProgress > 0 && (
@@ -251,7 +261,7 @@ const PokemonQuiz = () => {
                                     </div>
                                 </div>
                                 <small className="text-muted">
-                                    Loading Pokemon data... ({loadingProgress}%)
+                                    {t('quiz_loading_progress') || 'Loading Pokemon data...'} ({loadingProgress}%)
                                 </small>
                             </div>
                         )}
@@ -275,9 +285,9 @@ const PokemonQuiz = () => {
             <div className="quiz-header text-center py-4">
                 <h1 className="quiz-title">
                     <i className="bi bi-controller me-3"></i>
-                    Pokemon Quiz Challenge
+                    {t('quiz_title_long') || 'Pokemon Quiz Challenge'}
                 </h1>
-                <p className="quiz-subtitle">Test your Pokemon knowledge!</p>
+                <p className="quiz-subtitle">{t('quiz_subtitle') || 'Test your Pokemon knowledge!'}</p>
             </div>
 
             {/* Menu State */}
@@ -287,11 +297,11 @@ const PokemonQuiz = () => {
                         <div className="col-lg-8">
                             <div className="card quiz-card">
                                 <div className="card-body p-5">
-                                    <h2 className="text-center mb-4">Choose Your Challenge</h2>
+                                    <h2 className="text-center mb-4">{t('quiz_choose_challenge') || 'Choose Your Challenge'}</h2>
 
                                     {/* Game Mode Selection */}
                                     <div className="mb-4">
-                                        <h4 className="mb-3">Game Mode</h4>
+                                        <h4 className="mb-3">{t('quiz_game_mode') || 'Game Mode'}</h4>
                                         <div className="row g-3">
                                             {Object.entries(GAME_MODES).map(([key, mode]) => (
                                                 <div key={key} className="col-md-6">
@@ -306,10 +316,10 @@ const PokemonQuiz = () => {
                                                             {mode === 'silhouette' && <i className="bi bi-eye"></i>}
                                                         </div>
                                                         <div className="mode-name">
-                                                            {mode === 'image' && 'Guess by Image'}
-                                                            {mode === 'description' && 'Guess by Description'}
-                                                            {mode === 'type' && 'Guess by Type'}
-                                                            {mode === 'silhouette' && 'Guess Silhouette'}
+                                                            {mode === 'image' && (t('quiz_mode_image') || 'Guess by Image')}
+                                                            {mode === 'description' && (t('quiz_mode_description') || 'Guess by Description')}
+                                                            {mode === 'type' && (t('quiz_mode_type') || 'Guess by Type')}
+                                                            {mode === 'silhouette' && (t('quiz_mode_silhouette') || 'Guess Silhouette')}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -319,7 +329,7 @@ const PokemonQuiz = () => {
 
                                     {/* Difficulty Selection */}
                                     <div className="mb-4">
-                                        <h4 className="mb-3">Difficulty Level</h4>
+                                        <h4 className="mb-3">{t('quiz_difficulty_level') || 'Difficulty Level'}</h4>
                                         <div className="row g-3">
                                             {Object.entries(DIFFICULTY_LEVELS).map(([key, level]) => (
                                                 <div key={key} className="col-md-4">
@@ -327,9 +337,13 @@ const PokemonQuiz = () => {
                                                         className={`difficulty-card ${difficulty === key ? 'active' : ''} difficulty-${key.toLowerCase()}`}
                                                         onClick={() => setDifficulty(key)}
                                                     >
-                                                        <h5>{level.name}</h5>
-                                                        <p className="mb-1">{level.questionsCount} Questions</p>
-                                                        <p className="mb-0">{level.timeLimit}s per question</p>
+                                                        <h5>
+                                                            {key === 'EASY' && (t('quiz_diff_easy') || level.name)}
+                                                            {key === 'MEDIUM' && (t('quiz_diff_medium') || level.name)}
+                                                            {key === 'HARD' && (t('quiz_diff_hard') || level.name)}
+                                                        </h5>
+                                                        <p className="mb-1">{level.questionsCount} {t('quiz_questions') || 'Questions'}</p>
+                                                        <p className="mb-0">{level.timeLimit}{t('quiz_seconds_short') || 's'} {t('quiz_per_question') || 'per question'}</p>
                                                     </div>
                                                 </div>
                                             ))}
@@ -344,7 +358,7 @@ const PokemonQuiz = () => {
                                             disabled={quizPokemon.length === 0}
                                         >
                                             <i className="bi bi-play-fill me-2"></i>
-                                            Start Quiz
+                                            {t('quiz_start') || 'Start Quiz'}
                                         </button>
                                     </div>
                                 </div>
@@ -362,16 +376,16 @@ const PokemonQuiz = () => {
                         <div className="row align-items-center">
                             <div className="col-md-4">
                                 <div className="question-info">
-                                    Question {questionNumber} of {DIFFICULTY_LEVELS[difficulty].questionsCount}
+                                    {t('quiz_question') || 'Question'} {questionNumber} {t('quiz_of') || 'of'} {DIFFICULTY_LEVELS[difficulty].questionsCount}
                                 </div>
                             </div>
                             <div className="col-md-4 text-center">
-                                <div className="score">Score: {score}</div>
+                                <div className="score">{t('quiz_score_label') || 'Score'}: {score}</div>
                             </div>
                             <div className="col-md-4 text-end">
                                 <div className={`timer ${timeLeft <= 5 ? 'danger' : ''}`}>
                                     <i className="bi bi-clock me-2"></i>
-                                    {timeLeft}s
+                                    {timeLeft}{t('quiz_seconds_short') || 's'}
                                 </div>
                             </div>
                         </div>
@@ -390,7 +404,7 @@ const PokemonQuiz = () => {
                                             <div className="question-visual mb-4">
                                                 <img
                                                     src={currentQuestion.visual}
-                                                    alt="Pokemon"
+                                                    alt={t('quiz_pokemon_image_alt') || 'Pokemon'}
                                                     className={`pokemon-image ${currentQuestion.isSilhouette ? 'silhouette' : ''}`}
                                                 />
                                             </div>
@@ -435,12 +449,12 @@ const PokemonQuiz = () => {
                                                 {isCorrect ? (
                                                     <div className="text-success">
                                                         <i className="bi bi-check-circle me-2"></i>
-                                                        Correct! +{100 + Math.floor(timeLeft / 2)} points
+                                                        {(t('quiz_correct') || 'Correct!')} +{100 + Math.floor(timeLeft / 2)} {(t('quiz_points') || 'points')}
                                                     </div>
                                                 ) : (
                                                     <div className="text-danger">
                                                         <i className="bi bi-x-circle me-2"></i>
-                                                        {selectedAnswer ? 'Wrong!' : 'Time\'s up!'} The answer was {currentQuestion.correct.name}
+                                                        {selectedAnswer ? (t('quiz_wrong') || 'Wrong!') : (t('quiz_times_up') || "Time's up!")} {t('quiz_answer_was') || 'The answer was'} {currentQuestion.correct.name}
                                                     </div>
                                                 )}
                                             </div>
@@ -470,32 +484,32 @@ const PokemonQuiz = () => {
                                         )}
                                     </div>
 
-                                    <h2 className="mb-4">Quiz Complete!</h2>
+                                    <h2 className="mb-4">{t('quiz_complete') || 'Quiz Complete!'}</h2>
 
                                     <div className="results-stats mb-4">
                                         <div className="row g-3">
                                             <div className="col-6">
                                                 <div className="stat-card">
                                                     <h3>{gameStats.correctAnswers}</h3>
-                                                    <p>Correct Answers</p>
+                                                    <p>{t('quiz_correct_answers') || 'Correct Answers'}</p>
                                                 </div>
                                             </div>
                                             <div className="col-6">
                                                 <div className="stat-card">
                                                     <h3>{gameStats.totalQuestions}</h3>
-                                                    <p>Total Questions</p>
+                                                    <p>{t('quiz_total_questions') || 'Total Questions'}</p>
                                                 </div>
                                             </div>
                                             <div className="col-6">
                                                 <div className="stat-card">
                                                     <h3>{Math.round((gameStats.correctAnswers / gameStats.totalQuestions) * 100)}%</h3>
-                                                    <p>Accuracy</p>
+                                                    <p>{t('quiz_accuracy') || 'Accuracy'}</p>
                                                 </div>
                                             </div>
                                             <div className="col-6">
                                                 <div className="stat-card">
                                                     <h3>{gameStats.finalScore}</h3>
-                                                    <p>Final Score</p>
+                                                    <p>{t('quiz_final_score') || 'Final Score'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -507,14 +521,14 @@ const PokemonQuiz = () => {
                                             onClick={resetGame}
                                         >
                                             <i className="bi bi-arrow-repeat me-2"></i>
-                                            Play Again
+                                            {t('quiz_play_again') || 'Play Again'}
                                         </button>
                                         <button
                                             className="btn btn-outline-secondary"
                                             onClick={() => navigate('/')}
                                         >
                                             <i className="bi bi-house me-2"></i>
-                                            Home
+                                            {t('nav_home') || 'Home'}
                                         </button>
                                     </div>
                                 </div>
@@ -532,7 +546,7 @@ const PokemonQuiz = () => {
                         onClick={() => navigate('/')}
                     >
                         <i className="bi bi-arrow-left me-2"></i>
-                        Back to Home
+                        {t('quiz_back_home') || 'Back to Home'}
                     </button>
                 </div>
             )}

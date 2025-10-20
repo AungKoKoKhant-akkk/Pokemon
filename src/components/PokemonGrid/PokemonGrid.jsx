@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearch } from '../../context/SearchContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useComparison } from '../../context/ComparisonContext';
 import { usePokemonData } from '../../context/PokemonDataContext';
@@ -12,6 +13,7 @@ import { CARDS_PER_PAGE_OPTIONS, DEFAULT_CARDS_PER_PAGE, DEFAULT_PAGE } from '..
 
 const PokemonGrid = () => {
     const { searchTerm } = useSearch();
+    const { language } = useLanguage();
     const { favoritesCount } = useFavorites();
     const { getComparisonCount } = useComparison();
     const { pokemonList, pokemonTypes, isLoading } = usePokemonData();
@@ -68,11 +70,22 @@ const PokemonGrid = () => {
     const applyFilters = (shouldResetPage = false) => {
         let filtered = pokemon;
 
+        const getLocalizedName = (p) => {
+            if (language === 'ja' && Array.isArray(p.names) && p.names.length) {
+                const ja = p.names.find(n => n.language && n.language.name === 'ja');
+                if (ja && ja.name) return ja.name;
+            }
+            return p.name;
+        };
+
         // Apply search filter
         if (searchTerm && searchTerm.length > 0) {
-            filtered = filtered.filter(p =>
-                p.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+            const term = searchTerm.toLowerCase();
+            filtered = filtered.filter(p => {
+                const displayName = getLocalizedName(p);
+                // toLowerCase is no-op for Japanese characters; still safe for English
+                return String(displayName).toLowerCase().includes(term);
+            });
         }
 
         // Apply type filter
