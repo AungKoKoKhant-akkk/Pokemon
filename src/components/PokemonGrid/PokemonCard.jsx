@@ -41,10 +41,10 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
 
         if (isFavorite(pokemon.name)) {
             removeFromFavorites(pokemon.name);
-            feedback?.favorite?.showFeedback(`${pokemon.name} removed from favorites`, 'removed');
+            feedback?.favorite?.showFeedback(`${getLocalizedPokemonName(pokemon)} ${t('msg_removed_from_favorites')}`, 'removed');
         } else {
             addToFavorites(pokemon);
-            feedback?.favorite?.showFeedback(`${pokemon.name} added to favorites! ❤️`, 'added');
+            feedback?.favorite?.showFeedback(`${getLocalizedPokemonName(pokemon)} ${t('msg_added_to_favorites')} ❤️`, 'added');
         }
     };
 
@@ -164,7 +164,7 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                             onClick={() => navigate(`/pokemon/${pokemon.name.toLowerCase()}`)}
                         >
                             <i className="bi bi-eye me-2"></i>
-                            {t('viewDetails')}
+                            {t('favorites_view_details')}
                         </button>
 
                         {/* Secondary Actions */}
@@ -179,10 +179,10 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                                 onClick={(e) => handleComparisonToggle(pokemon, e)}
                                 title={
                                     isInComparison(pokemon.name)
-                                        ? t('removeFromComparison')
+                                        ? t('action_remove_from_comparison')
                                         : canAddMore()
-                                            ? t('addToComparison')
-                                            : t('comparisonLimitReached')
+                                            ? t('action_add_to_comparison')
+                                            : t('msg_comparison_limit_reached')
                                 }
                                 disabled={!isInComparison(pokemon.name) && !canAddMore()}
                             >
@@ -191,7 +191,7 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                                     : 'bi-bar-chart'
                                     }`}></i>
                                 <span className={`d-none d-md-inline ms-1 ${styles.buttonText}`}>
-                                    {isInComparison(pokemon.name) ? t('comparing') : t('compare')}
+                                    {t('nav_compare')}
                                 </span>
                             </button>
 
@@ -201,14 +201,14 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                                     : 'btn-outline-secondary'
                                     }`}
                                 onClick={(e) => handleFavoriteToggle(pokemon, e)}
-                                title={isFavorite(pokemon.name) ? t('removeFromFavorites') : t('addToFavorites')}
+                                title={isFavorite(pokemon.name) ? t('action_remove_from_favorites') : t('action_add_to_favorites')}
                             >
                                 <i className={`bi ${isFavorite(pokemon.name)
                                     ? 'bi-heart-fill'
                                     : 'bi-heart'
                                     }`}></i>
                                 <span className={`d-none d-md-inline ms-1 ${styles.buttonText}`}>
-                                    {isFavorite(pokemon.name) ? t('favorited') : t('favorite')}
+                                    {t('nav_favorites')}
                                 </span>
                             </button>
                         </div>

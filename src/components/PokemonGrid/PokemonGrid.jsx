@@ -38,6 +38,8 @@ const PokemonGrid = () => {
         }
     }, [cardsPerPage, setPaginationValue]);
 
+
+
     // Use custom hook for feedback messages
     const feedback = useMultipleFeedback({
         favorite: { duration: 3000 },
@@ -46,6 +48,14 @@ const PokemonGrid = () => {
 
     const [filteredPokemon, setFilteredPokemon] = useState([]);
     const [types, setTypes] = useState([]);
+
+    // Ensure selected type is valid (e.g., handle removed types like 'stellar')
+    useEffect(() => {
+        if (types.length > 0 && !types.includes(selectedType)) {
+            setPaginationValue('Type', 'All');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [types, selectedType]);
 
     // Track previous filter values to detect actual changes
     const prevSearchTerm = useRef(searchTerm);
