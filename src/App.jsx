@@ -6,6 +6,7 @@ import { SearchProvider } from './context/SearchContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { ComparisonProvider } from './context/ComparisonContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { PokemonDataProvider } from './context/PokemonDataContext';
 import { PokemonQuizProvider } from './context/PokemonQuizContext';
 
@@ -28,26 +29,28 @@ import './assets/theme.css';
 const App = () => {
     return (
         <ThemeProvider>
-            <PokemonDataProvider>
-                <PokemonQuizProvider>
-                    <FavoritesProvider>
-                        <SearchProvider>
-                            <ComparisonProvider>
-                                <div>
-                                    <Navigation />
-                                    <Routes>
-                                        <Route path="/" element={<HomePage />} />
-                                        <Route path="/pokemon/:name" element={<PokemonDetail />} />
-                                        <Route path="/comparison" element={<PokemonComparison />} />
-                                        <Route path="/quiz" element={<PokemonQuiz />} />
-                                        <Route path="/favorites" element={<Favorites />} />
-                                    </Routes>
-                                </div>
-                            </ComparisonProvider>
-                        </SearchProvider>
-                    </FavoritesProvider>
-                </PokemonQuizProvider>
-            </PokemonDataProvider>
+            <LanguageProvider>
+                <PokemonDataProvider>
+                    <PokemonQuizProvider>
+                        <FavoritesProvider>
+                            <SearchProvider>
+                                <ComparisonProvider>
+                                    <div>
+                                        <Navigation />
+                                        <Routes>
+                                            <Route path="/" element={<HomePage />} />
+                                            <Route path="/pokemon/:name" element={<PokemonDetail />} />
+                                            <Route path="/comparison" element={<PokemonComparison />} />
+                                            <Route path="/quiz" element={<PokemonQuiz />} />
+                                            <Route path="/favorites" element={<Favorites />} />
+                                        </Routes>
+                                    </div>
+                                </ComparisonProvider>
+                            </SearchProvider>
+                        </FavoritesProvider>
+                    </PokemonQuizProvider>
+                </PokemonDataProvider>
+            </LanguageProvider>
         </ThemeProvider>
     );
 };

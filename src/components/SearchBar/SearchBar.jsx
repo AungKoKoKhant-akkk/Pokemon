@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useSearch } from '../../context/SearchContext';
+import { useLanguage } from '../../context/LanguageContext';
 import "./SearchBar.css"
 
 // Updated: Fixed duplicate buttons issue - SIMPLIFIED VERSION
 const SearchBar = () => {
     const { searchTerm, updateSearch, clearSearch } = useSearch();
+    const { t, language } = useLanguage();
     const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
 
     const handleInputChange = (e) => {
@@ -26,7 +28,7 @@ const SearchBar = () => {
                         <input
                             className="form-control form-control-lg"
                             type="text"
-                            placeholder="Search Pokemon by name (e.g., Pikachu, Charizard...)"
+                            placeholder={t('search_placeholder')}
                             aria-label="Search Pokemon"
                             value={localSearchTerm}
                             onChange={handleInputChange}
@@ -89,7 +91,7 @@ const SearchBar = () => {
                     {searchTerm && (
                         <div className="mt-2 text-center">
                             <small className="text-muted">
-                                🔍 Searching for: <strong>"{searchTerm}"</strong>
+                                🔍 {language === 'en' ? 'Searching for:' : '検索中:'} <strong>"{searchTerm}"</strong>
                             </small>
                         </div>
                     )}

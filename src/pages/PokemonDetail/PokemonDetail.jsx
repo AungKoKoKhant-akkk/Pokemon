@@ -4,9 +4,12 @@ import { useFavorites } from '../../context/FavoritesContext';
 import { useComparison } from '../../context/ComparisonContext';
 import { usePokemonData } from '../../context/PokemonDataContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { getPokemonTypeColor, formatPokemonId, getBestPokemonImage } from '../../utils';
 // Removed PokemonEvolutionTree import
 import './PokemonDetail.css';
+import EvolutionChain from './EvolutionChain/EvolutionChain';
+import SpritesGallery from './SpritesGallery/SpritesGallery';
 
 const PokemonDetail = () => {
     const { name } = useParams();
@@ -15,6 +18,7 @@ const PokemonDetail = () => {
     const { addToComparison, removeFromComparison, isInComparison, canAddMore } = useComparison();
     const { getPokemonDetails, getPokemonSpecies, getEvolutionChain } = usePokemonData();
     const { isDark } = useTheme();
+    const { t, language, getPokemonName, getPokemonDescription, getTypeName } = useLanguage();
     const [pokemon, setPokemon] = useState(null);
     const [species, setSpecies] = useState(null);
     const [evolutionChain, setEvolutionChain] = useState(null);
@@ -39,9 +43,10 @@ const PokemonDetail = () => {
 
         const result = toggleFavorite(pokemonData);
 
+        const pokemonDisplayName = getPokemonName(pokemon, species);
         const message = result.action === 'added'
-            ? `${pokemon.name} added to favorites! ❤️`
-            : `${pokemon.name} removed from favorites`;
+            ? `${pokemonDisplayName} ${t('msg_added_to_favorites')}`
+            : `${pokemonDisplayName} ${t('msg_removed_from_favorites')}`;
 
         setFavoriteActionFeedback({
             message,
@@ -72,7 +77,7 @@ const PokemonDetail = () => {
         } else if (canAddMore()) {
             result = addToComparison(pokemonData);
         } else {
-            result = { success: false, message: 'Maximum 3 Pokemon can be compared at once' };
+            result = { success: false, message: t('msg_comparison_limit') };
         }
 
         if (result) {
@@ -153,7 +158,7 @@ const PokemonDetail = () => {
                         <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
                             <span className="visually-hidden">Loading...</span>
                         </div>
-                        <h4 className="mt-3">Loading Pokemon Details...</h4>
+                        <h4 className="mt-3">{t('msg_loading')}</h4>
                     </div>
                 </div>
             </div>
@@ -164,9 +169,9 @@ const PokemonDetail = () => {
         return (
             <div className="container my-5">
                 <div className="alert alert-danger text-center">
-                    <h4>{error}</h4>
+                    <h4>{t('msg_not_found')}</h4>
                     <button className="btn btn-primary mt-3" onClick={() => navigate(-1)}>
-                        Go Back
+                        {t('action_go_back')}
                     </button>
                 </div>
             </div>
@@ -218,7 +223,7 @@ const PokemonDetail = () => {
             <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                 <button className="btn btn-outline-primary" onClick={() => navigate('/')}>
                     <i className="bi bi-arrow-left me-2"></i>
-                    Back to Pokemon List
+                    {t('action_back')}
                 </button>
 
                 <div className="d-flex gap-2 flex-wrap">
@@ -232,10 +237,10 @@ const PokemonDetail = () => {
                         onClick={handleComparisonToggle}
                         title={
                             isInComparison(pokemon.name)
-                                ? 'Remove from comparison'
+                                ? t('action_remove_from_comparison')
                                 : canAddMore()
-                                    ? 'Add to comparison'
-                                    : 'Comparison limit reached'
+                                    ? t('action_add_to_comparison')
+                                    : t('msg_comparison_limit_reached')
                         }
                         disabled={!isInComparison(pokemon.name) && !canAddMore()}
                     >
@@ -243,7 +248,7 @@ const PokemonDetail = () => {
                             ? 'bi-bar-chart-fill'
                             : 'bi-bar-chart'
                             } me-2`}></i>
-                        {isInComparison(pokemon.name) ? 'Remove from Comparison' : 'Add to Comparison'}
+                        {isInComparison(pokemon.name) ? t('action_remove_from_comparison') : t('action_add_to_comparison')}
                     </button>
 
                     <button
@@ -252,13 +257,13 @@ const PokemonDetail = () => {
                             : 'btn-outline-danger'
                             }`}
                         onClick={handleFavoriteToggle}
-                        title={isFavorite(pokemon.name) ? 'Remove from favorites' : 'Add to favorites'}
+                        title={isFavorite(pokemon.name) ? t('action_remove_from_favorites') : t('action_add_to_favorites')}
                     >
                         <i className={`bi ${isFavorite(pokemon.name)
                             ? 'bi-heart-fill'
                             : 'bi-heart'
                             } me-2`}></i>
-                        {isFavorite(pokemon.name) ? 'Remove from Favorites' : 'Add to Favorites'}
+                        {isFavorite(pokemon.name) ? t('action_remove_from_favorites') : t('action_add_to_favorites')}
                     </button>
                 </div>
             </div>
@@ -275,7 +280,7 @@ const PokemonDetail = () => {
                                 style={{ maxHeight: '300px' }}
                             />
                             <h1 className="card-title text-capitalize mb-3">
-                                {pokemon.name}
+                                {getPokemonName(pokemon, species)}
                                 {isFavorite(pokemon.name) && (
                                     <i className="bi bi-heart-fill text-danger ms-2" title="In Favorites"></i>
                                 )}
@@ -291,7 +296,7 @@ const PokemonDetail = () => {
                                             fontSize: '0.9rem'
                                         }}
                                     >
-                                        {type.type.name.toUpperCase()}
+                                        {getTypeName(type.type.name)}
                                     </span>
                                 ))}
                             </div>
@@ -304,43 +309,41 @@ const PokemonDetail = () => {
                 <div className="col-md-6">
                     <div className="card shadow-lg h-100">
                         <div className="card-header bg-primary text-white">
-                            <h4 className="mb-0">Basic Information</h4>
+                            <h4 className="mb-0">{t('detail_basic_info')}</h4>
                         </div>
                         <div className="card-body">
                             <div className="row mb-3">
                                 <div className="col-6">
-                                    <strong>Height:</strong>
+                                    <strong>{t('detail_height')}:</strong>
                                     <p className="mb-0">{(pokemon.height / 10).toFixed(1)} m</p>
                                 </div>
                                 <div className="col-6">
-                                    <strong>Weight:</strong>
+                                    <strong>{t('detail_weight')}:</strong>
                                     <p className="mb-0">{(pokemon.weight / 10).toFixed(1)} kg</p>
                                 </div>
                             </div>
                             <div className="mb-3">
-                                <strong>Base Experience:</strong>
+                                <strong>{t('detail_base_experience')}:</strong>
                                 <p className="mb-0">{pokemon.base_experience} XP</p>
                             </div>
                             <div className="mb-3">
-                                <strong>Abilities:</strong>
+                                <strong>{t('detail_abilities')}:</strong>
                                 <ul className="list-unstyled mb-0">
                                     {pokemon.abilities.map(ability => (
                                         <li key={ability.ability.name} className="mb-1">
                                             <span className="badge bg-secondary me-2">
                                                 {ability.ability.name.replace('-', ' ')}
                                             </span>
-                                            {ability.is_hidden && <small className="text-muted">(Hidden)</small>}
+                                            {ability.is_hidden && <small className="text-muted">({t('detail_hidden')})</small>}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                             {species && species.flavor_text_entries && (
                                 <div className="mb-3">
-                                    <strong>Description:</strong>
+                                    <strong>{t('detail_description')}:</strong>
                                     <p className="mb-0 small">
-                                        {species.flavor_text_entries
-                                            .find(entry => entry.language.name === 'en')?.flavor_text
-                                            .replace(/\f/g, ' ') || 'No description available'}
+                                        {getPokemonDescription(species) || t('msg_no_description')}
                                     </p>
                                 </div>
                             )}
@@ -348,7 +351,7 @@ const PokemonDetail = () => {
                             {/* Evolution Information */}
                             {evolutionChain && (
                                 <div className="mb-3">
-                                    <strong>Evolution Chain:</strong>
+                                    <strong>{t('detail_evolution_chain')}:</strong>
                                     <div className="evolution-chain mt-2">
                                         {(() => {
                                             const evolutions = [];
@@ -463,29 +466,32 @@ const PokemonDetail = () => {
                 <div className="col-12">
                     <div className="card shadow-lg">
                         <div className="card-header bg-success text-white">
-                            <h4 className="mb-0">Base Stats</h4>
+                            <h4 className="mb-0">{t('detail_stats')}</h4>
                         </div>
                         <div className="card-body">
                             <div className="row">
-                                {pokemon.stats.map(stat => (
-                                    <div key={stat.stat.name} className="col-md-6 mb-3">
-                                        <div className="d-flex justify-content-between align-items-center mb-1">
-                                            <span className="fw-bold text-capitalize">
-                                                {stat.stat.name.replace('-', ' ')}:
-                                            </span>
-                                            <span className="badge bg-primary">{stat.base_stat}</span>
+                                {pokemon.stats.map(stat => {
+                                    const statKey = `stat_${stat.stat.name.replace('-', '_')}`;
+                                    return (
+                                        <div key={stat.stat.name} className="col-md-6 mb-3">
+                                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                                <span className="fw-bold text-capitalize">
+                                                    {t(statKey)}:
+                                                </span>
+                                                <span className="badge bg-primary">{stat.base_stat}</span>
+                                            </div>
+                                            <div className="progress" style={{ height: '10px' }}>
+                                                <div
+                                                    className="progress-bar bg-success"
+                                                    style={{ width: `${(stat.base_stat / 255) * 100}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
-                                        <div className="progress" style={{ height: '10px' }}>
-                                            <div
-                                                className="progress-bar bg-success"
-                                                style={{ width: `${(stat.base_stat / 255) * 100}%` }}
-                                            ></div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                             <div className="mt-3 text-center">
-                                <strong>Total Base Stats: </strong>
+                                <strong>{language === 'en' ? 'Total Base Stats: ' : '合計基礎ステータス: '}</strong>
                                 <span className="badge bg-warning text-dark fs-6">
                                     {pokemon.stats.reduce((total, stat) => total + stat.base_stat, 0)}
                                 </span>
@@ -497,86 +503,16 @@ const PokemonDetail = () => {
 
             {/* Evolution Chain */}
             {evolutionChain && (
-                <div className="row mb-4">
-                    <div className="col-12">
-                        <div className="card shadow-lg">
-                            <div className="card-header bg-warning text-dark">
-                                <h4 className="mb-0">Evolution Chain</h4>
-                            </div>
-                            <div className="card-body">
-                                <div className="d-flex justify-content-center align-items-center flex-wrap">
-                                    {formatEvolutionChain(evolutionChain.chain).map((evolution, index) => (
-                                        <React.Fragment key={evolution.name}>
-                                            <div className="text-center mx-3 mb-3">
-                                                <div
-                                                    className="border rounded p-3 border-secondary bg-light"
-                                                    style={{ minWidth: '120px' }}
-                                                >
-                                                    <img src={evolution.image} alt={evolution.name} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
-                                                    <h6 className="text-capitalize mb-2 mt-2">{evolution.name}</h6>
-                                                    {evolution.minLevel && (
-                                                        <small className="text-muted">Level {evolution.minLevel}</small>
-                                                    )}
-                                                    {evolution.trigger && evolution.trigger !== 'level-up' && (
-                                                        <small className="text-muted d-block">{evolution.trigger}</small>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {index < formatEvolutionChain(evolutionChain.chain).length - 1 && (
-                                                <div className="text-center mx-2">
-                                                    <i className="bi bi-arrow-right text-primary" style={{ fontSize: '1.5rem' }}></i>
-                                                </div>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <EvolutionChain evolutionChain={evolutionChain} pokemon={pokemon} />
             )}
 
             {/* Evolution Tree Section */}
             {/* Evolution Tree Section removed */}
 
             {/* Sprites Gallery */}
-            <div className="row">
-                <div className="col-12">
-                    <div className="card shadow-lg">
-                        <div className="card-header bg-info text-white">
-                            <h4 className="mb-0">Sprites Gallery</h4>
-                        </div>
-                        <div className="card-body">
-                            <div className="row text-center">
-                                {pokemon.sprites.front_default && (
-                                    <div className="col-md-3 mb-3">
-                                        <img src={pokemon.sprites.front_default} alt="Front Default" className="img-fluid border rounded" />
-                                        <p className="small mt-2">Front Default</p>
-                                    </div>
-                                )}
-                                {pokemon.sprites.back_default && (
-                                    <div className="col-md-3 mb-3">
-                                        <img src={pokemon.sprites.back_default} alt="Back Default" className="img-fluid border rounded" />
-                                        <p className="small mt-2">Back Default</p>
-                                    </div>
-                                )}
-                                {pokemon.sprites.front_shiny && (
-                                    <div className="col-md-3 mb-3">
-                                        <img src={pokemon.sprites.front_shiny} alt="Front Shiny" className="img-fluid border rounded" />
-                                        <p className="small mt-2">Front Shiny ✨</p>
-                                    </div>
-                                )}
-                                {pokemon.sprites.back_shiny && (
-                                    <div className="col-md-3 mb-3">
-                                        <img src={pokemon.sprites.back_shiny} alt="Back Shiny" className="img-fluid border rounded" />
-                                        <p className="small mt-2">Back Shiny ✨</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {pokemon && pokemon.sprites && (
+                <SpritesGallery sprites={pokemon.sprites} name={pokemon.name} />
+            )}
         </div>
     );
 };

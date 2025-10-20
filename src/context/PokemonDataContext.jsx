@@ -62,6 +62,9 @@ export const PokemonDataProvider = ({ children }) => {
                             // Ensure we have valid types
                             const validTypes = typeArray.filter(type => type && type.trim().length > 0);
 
+                            // Extract Japanese names from species data
+                            const japaneseNames = species.data.names || [];
+
                             // Cache the detailed data
                             pokemonCache.set(details.data.name.toLowerCase(), details.data);
                             speciesCache.set(details.data.name.toLowerCase(), species.data);
@@ -77,7 +80,8 @@ export const PokemonDataProvider = ({ children }) => {
                                 type: `Type : ${types || "N/A"}`,
                                 pokemonTypes: validTypes,
                                 generations: generations || "N/A",
-                                image: image || "N/A"
+                                image: image || "N/A",
+                                names: japaneseNames // Add multilingual names array
                             };
                         } catch (err) {
                             console.warn(`Failed to fetch details for ${p.name}:`, err);

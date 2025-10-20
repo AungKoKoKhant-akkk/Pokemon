@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 // Context imports
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { usePokemonQuiz } from '../../context/PokemonQuizContext';
 
 // Constants
@@ -14,6 +15,7 @@ import './PokemonQuiz.css';
 const PokemonQuiz = () => {
     const navigate = useNavigate();
     const { isDark } = useTheme();
+    const { t, language, getPokemonName } = useLanguage();
     const {
         quizPokemon,
         isLoading,
@@ -21,6 +23,15 @@ const PokemonQuiz = () => {
         error,
         getRandomPokemon
     } = usePokemonQuiz();
+
+    // Helper to get Pokemon name in current language
+    const getLocalizedPokemonName = useCallback((pokemon) => {
+        if (!pokemon.names) {
+            return pokemon.displayName || pokemon.name;
+        }
+        const localizedName = pokemon.names.find(n => n.language.name === language);
+        return localizedName?.name || pokemon.displayName || pokemon.name;
+    }, [language]);
 
     // Helper functions
     const generateQuestion = useCallback(() => {
@@ -30,7 +41,7 @@ const PokemonQuiz = () => {
         if (!randomPokemon.length) return null;
 
         const correctAnswer = randomPokemon[0];
-        const options = randomPokemon.map(p => p.name);
+        const options = randomPokemon; // Store full pokemon objects instead of just names
 
         return { correctAnswer, options };
     }, [quizPokemon, getRandomPokemon]);
@@ -88,7 +99,7 @@ const PokemonQuiz = () => {
 
     // Generate question based on game mode
     const generateQuizQuestion = useCallback(() => {
-        const questionData = generateQuestion(gameMode, difficulty);
+        const questionData = generateQuestion();
         if (!questionData) return null;
 
         const { correctAnswer, options } = questionData;
@@ -388,30 +399,33 @@ const PokemonQuiz = () => {
                                         {/* Answer Options */}
                                         <div className="answer-options">
                                             <div className="row g-3">
-                                                {currentQuestion.options.map((pokemon, index) => (
-                                                    <div key={index} className="col-md-6">
-                                                        <button
-                                                            className={`btn answer-btn w-100 ${showResult
-                                                                ? selectedAnswer === pokemon.name
-                                                                    ? isCorrect ? 'btn-success' : 'btn-danger'
-                                                                    : pokemon.name === currentQuestion.correct.name
-                                                                        ? 'btn-success'
-                                                                        : 'btn-outline-secondary'
-                                                                : 'btn-outline-primary'
-                                                                }`}
-                                                            onClick={() => handleAnswerSelect(pokemon.name)}
-                                                            disabled={showResult}
-                                                        >
-                                                            {pokemon.name}
-                                                            {showResult && pokemon.name === currentQuestion.correct.name && (
-                                                                <i className="bi bi-check-circle ms-2"></i>
-                                                            )}
-                                                            {showResult && selectedAnswer === pokemon.name && !isCorrect && (
-                                                                <i className="bi bi-x-circle ms-2"></i>
-                                                            )}
-                                                        </button>
-                                                    </div>
-                                                ))}
+                                                {currentQuestion.options.map((pokemon, index) => {
+                                                    const pokemonName = getLocalizedPokemonName(pokemon);
+                                                    return (
+                                                        <div key={index} className="col-md-6">
+                                                            <button
+                                                                className={`btn answer-btn w-100 ${showResult
+                                                                    ? selectedAnswer === pokemon.name
+                                                                        ? isCorrect ? 'btn-success' : 'btn-danger'
+                                                                        : pokemon.name === currentQuestion.correct.name
+                                                                            ? 'btn-success'
+                                                                            : 'btn-outline-secondary'
+                                                                    : 'btn-outline-primary'
+                                                                    }`}
+                                                                onClick={() => handleAnswerSelect(pokemon.name)}
+                                                                disabled={showResult}
+                                                            >
+                                                                {pokemonName}
+                                                                {showResult && pokemon.name === currentQuestion.correct.name && (
+                                                                    <i className="bi bi-check-circle ms-2"></i>
+                                                                )}
+                                                                {showResult && selectedAnswer === pokemon.name && !isCorrect && (
+                                                                    <i className="bi bi-x-circle ms-2"></i>
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
 

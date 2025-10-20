@@ -8,6 +8,7 @@ export const CACHE_EXPIRY = 10 * 60 * 1000; // 10 minutes
 // Local storage keys
 export const STORAGE_KEYS = {
     THEME: 'pokemon-app-theme',
+    LANGUAGE: 'pokemon-app-language',
     FAVORITES: 'pokemon-favorites',
     COMPARISON: 'pokemonComparison',
     QUIZ_DATA: 'pokemon-quiz-data',

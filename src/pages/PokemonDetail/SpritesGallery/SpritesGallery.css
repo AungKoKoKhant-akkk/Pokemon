@@ -1,0 +1,34 @@
+/* SpritesGallery.css - Styles for Sprites Gallery Component */
+.sprites-gallery {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+    overflow: hidden;
+}
+
+.sprite-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 1px 4px rgba(44, 62, 80, 0.06);
+    transition: box-shadow 0.2s;
+    width: 100px;
+}
+
+.sprite-item:hover {
+    box-shadow: 0 4px 16px rgba(44, 62, 80, 0.14);
+}
+
+.sprite-img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #e1e8ed;
+}
+
+.sprite-label {
+    margin-top: 4px;
+    font-size: 0.85em;
+    color: #6c757d;
+}

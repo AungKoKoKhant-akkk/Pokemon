@@ -6,3 +6,4 @@ export * from './appConstants';
 export * from './gameConstants';
 export * from './pokemonGrid';
 export * from './typeConstants';
+export * from './languageConstants';
