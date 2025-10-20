@@ -69,6 +69,11 @@ export const UI_TRANSLATIONS = {
         search_type_filter: 'Filter by Type',
         search_all_types: 'All Types',
 
+        // Grid/Filter Info
+        grid_showing: 'Showing',
+        grid_of: 'of',
+        label_pokemon: 'Pokemon',
+
         // Pokemon Types
         type_normal: 'NORMAL',
         type_fire: 'FIRE',
@@ -211,6 +216,11 @@ export const UI_TRANSLATIONS = {
         search_placeholder: 'ポケモンを検索...',
         search_type_filter: 'タイプで絞り込む',
         search_all_types: 'すべてのタイプ',
+
+        // Grid/Filter Info
+        grid_showing: '表示',
+        grid_of: '／',
+        label_pokemon: 'ポケモン',
 
         // Pokemon Types
         type_normal: 'ノーマル',

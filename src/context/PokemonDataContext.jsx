@@ -103,12 +103,11 @@ export const PokemonDataProvider = ({ children }) => {
                     }
                 });
 
-                // Define official Pokemon types (18 main types + newer official types)
+                // Define official Pokemon types (18 main types)
                 const officialTypes = [
                     'normal', 'fire', 'water', 'electric', 'grass', 'ice',
                     'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug',
-                    'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy',
-                    'stellar' // New Tera type from recent games
+                    'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'
                 ];
 
                 // Filter to only include official types that actually exist in the data

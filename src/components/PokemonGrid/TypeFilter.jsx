@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getPokemonTypeColor } from '../../utils/pokemonUtils';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import styles from './TypeFilter.module.css';
 
 const TypeFilter = ({
@@ -15,6 +16,7 @@ const TypeFilter = ({
 }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { isDark } = useTheme();
+    const { t, getTypeName } = useLanguage();
 
     return (
         <div className="row mb-4">
@@ -24,7 +26,7 @@ const TypeFilter = ({
                         <div className="d-flex justify-content-between align-items-center">
                             <h5 className="mb-0">
                                 <i className="bi bi-funnel me-2"></i>
-                                Filter by Type
+                                {t('search_type_filter') || 'Filter by Type'}
                             </h5>
                             <button
                                 className="btn btn-link text-white p-0 d-md-none"
@@ -64,7 +66,9 @@ const TypeFilter = ({
                                         }}
                                         onClick={() => onTypeFilter(type)}
                                     >
-                                        <span className={styles.typeName}>{type}</span>
+                                        <span className={styles.typeName}>
+                                            {type === 'All' ? (t('search_all_types') || 'All') : getTypeName(type)}
+                                        </span>
                                         <span className={`ms-1 badge ${styles.typeBadge}`}>
                                             {pokemonCount}
                                         </span>
@@ -79,7 +83,7 @@ const TypeFilter = ({
                                 <div className="d-flex flex-wrap align-items-center gap-2">
                                     <small className="text-muted">
                                         <i className="bi bi-info-circle me-1"></i>
-                                        Showing <strong>{filteredPokemon.length}</strong> of <strong>{pokemon.length}</strong> Pokemon
+                                        {t('grid_showing')} <strong>{filteredPokemon.length}</strong> {t('grid_of')} <strong>{pokemon.length}</strong> {t('label_pokemon')}
                                     </small>
 
                                     {/* Active Filters */}
@@ -93,7 +97,13 @@ const TypeFilter = ({
                                         {selectedType !== 'All' && (
                                             <span className="badge bg-secondary">
                                                 <i className="bi bi-funnel me-1"></i>
-                                                {selectedType}
+                                                {getTypeName(selectedType)}
+                                            </span>
+                                        )}
+                                        {selectedType === 'All' && (
+                                            <span className="badge bg-secondary">
+                                                <i className="bi bi-funnel me-1"></i>
+                                                {t('search_all_types') || 'All'}
                                             </span>
                                         )}
                                     </div>
@@ -104,12 +114,12 @@ const TypeFilter = ({
                                     <small className="text-muted">
                                         <i className="bi bi-heart-fill text-danger me-1"></i>
                                         <span className="badge bg-danger">{favoritesCount}</span>
-                                        <span className="ms-1 d-none d-sm-inline">Favorites</span>
+                                        <span className="ms-1 d-none d-sm-inline">{t('nav_favorites')}</span>
                                     </small>
                                     <small className="text-muted">
                                         <i className="bi bi-bar-chart-fill text-info me-1"></i>
                                         <span className="badge bg-info">{comparisonCount}</span>
-                                        <span className="ms-1 d-none d-sm-inline">Compare</span>
+                                        <span className="ms-1 d-none d-sm-inline">{t('nav_compare')}</span>
                                     </small>
                                 </div>
                             </div>
