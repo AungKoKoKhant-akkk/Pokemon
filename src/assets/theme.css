@@ -252,3 +252,132 @@ body {
 .theme-dark::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+/* Evolution Tree Dark Mode Text Visibility - High Priority */
+.theme-dark .evolution-tree-container .pokemon-name,
+body.theme-dark .evolution-tree-container .pokemon-name,
+[data-theme="dark"] .evolution-tree-container .pokemon-name {
+    color: #ffffff !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
+    font-weight: bold !important;
+}
+
+.theme-dark .evolution-tree-container .requirement-text,
+body.theme-dark .evolution-tree-container .requirement-text,
+[data-theme="dark"] .evolution-tree-container .requirement-text {
+    color: #ffffff !important;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.theme-dark .evolution-tree-container .card-hover-overlay span,
+body.theme-dark .evolution-tree-container .card-hover-overlay span,
+[data-theme="dark"] .evolution-tree-container .card-hover-overlay span {
+    color: #ffffff !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+.theme-dark .evolution-tree-container h1,
+.theme-dark .evolution-tree-container h2,
+.theme-dark .evolution-tree-container h3,
+.theme-dark .evolution-tree-container h4,
+.theme-dark .evolution-tree-container h5,
+.theme-dark .evolution-tree-container h6,
+body.theme-dark .evolution-tree-container h1,
+body.theme-dark .evolution-tree-container h2,
+body.theme-dark .evolution-tree-container h3,
+body.theme-dark .evolution-tree-container h4,
+body.theme-dark .evolution-tree-container h5,
+body.theme-dark .evolution-tree-container h6,
+[data-theme="dark"] .evolution-tree-container h1,
+[data-theme="dark"] .evolution-tree-container h2,
+[data-theme="dark"] .evolution-tree-container h3,
+[data-theme="dark"] .evolution-tree-container h4,
+[data-theme="dark"] .evolution-tree-container h5,
+[data-theme="dark"] .evolution-tree-container h6 {
+    color: #ffffff !important;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.theme-dark .evolution-tree-container p,
+.theme-dark .evolution-tree-container span,
+.theme-dark .evolution-tree-container div,
+body.theme-dark .evolution-tree-container p,
+body.theme-dark .evolution-tree-container span,
+body.theme-dark .evolution-tree-container div,
+[data-theme="dark"] .evolution-tree-container p,
+[data-theme="dark"] .evolution-tree-container span,
+[data-theme="dark"] .evolution-tree-container div {
+    color: #e2e8f0 !important;
+}
+
+.theme-dark .evolution-tree-container .pokemon-info,
+body.theme-dark .evolution-tree-container .pokemon-info,
+[data-theme="dark"] .evolution-tree-container .pokemon-info {
+    color: #ffffff !important;
+}
+
+.theme-dark .evolution-tree-container .pokemon-id-badge,
+body.theme-dark .evolution-tree-container .pokemon-id-badge,
+[data-theme="dark"] .evolution-tree-container .pokemon-id-badge {
+    background: rgba(66, 153, 225, 0.8) !important;
+    color: #ffffff !important;
+}
+
+/* ULTIMATE fallback - force ALL text in evolution tree to be visible */
+.theme-dark .evolution-tree-container *,
+body.theme-dark .evolution-tree-container *,
+[data-theme="dark"] .evolution-tree-container * {
+    color: #ffffff !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* ULTIMATE fallback - force ALL text in evolution nodes to be visible */
+.theme-dark .evolution-node *,
+body.theme-dark .evolution-node *,
+[data-theme="dark"] .evolution-node * {
+    color: #ffffff !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Enhanced Modal Dark Mode - Dark Text for Better Readability */
+.theme-dark .enhanced-modal h1,
+.theme-dark .enhanced-modal h2,
+.theme-dark .enhanced-modal h3,
+.theme-dark .enhanced-modal h4,
+.theme-dark .enhanced-modal h5,
+.theme-dark .enhanced-modal h6,
+body.theme-dark .enhanced-modal h1,
+body.theme-dark .enhanced-modal h2,
+body.theme-dark .enhanced-modal h3,
+body.theme-dark .enhanced-modal h4,
+body.theme-dark .enhanced-modal h5,
+body.theme-dark .enhanced-modal h6,
+[data-theme="dark"] .enhanced-modal h1,
+[data-theme="dark"] .enhanced-modal h2,
+[data-theme="dark"] .enhanced-modal h3,
+[data-theme="dark"] .enhanced-modal h4,
+[data-theme="dark"] .enhanced-modal h5,
+[data-theme="dark"] .enhanced-modal h6 {
+    color: #1a202c !important;
+}
+
+.theme-dark .enhanced-modal .modal-title,
+.theme-dark .enhanced-modal .info-label,
+.theme-dark .enhanced-modal .info-value,
+.theme-dark .enhanced-modal p,
+.theme-dark .enhanced-modal span,
+.theme-dark .enhanced-modal div,
+body.theme-dark .enhanced-modal .modal-title,
+body.theme-dark .enhanced-modal .info-label,
+body.theme-dark .enhanced-modal .info-value,
+body.theme-dark .enhanced-modal p,
+body.theme-dark .enhanced-modal span,
+body.theme-dark .enhanced-modal div,
+[data-theme="dark"] .enhanced-modal .modal-title,
+[data-theme="dark"] .enhanced-modal .info-label,
+[data-theme="dark"] .enhanced-modal .info-value,
+[data-theme="dark"] .enhanced-modal p,
+[data-theme="dark"] .enhanced-modal span,
+[data-theme="dark"] .enhanced-modal div {
+    color: #2d3748 !important;
+}

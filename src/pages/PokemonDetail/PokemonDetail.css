@@ -1,0 +1,81 @@
+/* PokemonDetail.css - Styles for Pokemon Detail Page */
+
+/* Action Buttons Styling */
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-warning {
+    color: #212529;
+}
+
+.btn-outline-info:hover:not(:disabled) {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+}
+
+.btn-outline-secondary:disabled {
+    background-color: transparent;
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+/* Responsive button layout */
+@media (max-width: 576px) {
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .d-flex.gap-2.flex-wrap {
+        justify-content: center;
+    }
+}
+
+
+
+
+/* Dark mode support for evolution chain */
+.theme-dark .evolution-chain {
+    background: linear-gradient(135deg, rgba(159, 122, 234, 0.15), rgba(128, 90, 213, 0.1));
+    border-color: rgba(159, 122, 234, 0.3);
+}
+
+.theme-dark .evolution-chain .badge.bg-light {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.9), rgba(26, 32, 44, 0.8)) !important;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #e2e8f0 !important;
+}
+
+.theme-dark .evolution-chain .badge.bg-light:hover {
+    background: linear-gradient(135deg, rgba(55, 65, 82, 0.9), rgba(36, 42, 54, 0.8)) !important;
+}
+
+/* Dark mode clickable evolution badges */
+.theme-dark .evolution-chain .badge[style*="cursor: pointer"]:hover {
+    background: linear-gradient(135deg, #0d6efd, #084298) !important;
+    color: white !important;
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
+}
+
+.theme-dark .evolution-arrow i {
+    color: #b794f6 !important;
+}
+
+/* Evolution stage info styling */
+.evolution-stage-info {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.theme-dark .evolution-stage-info {
+    background: rgba(159, 122, 234, 0.15);
+    border-color: rgba(159, 122, 234, 0.3);
+    color: #cbd5e0;
+}

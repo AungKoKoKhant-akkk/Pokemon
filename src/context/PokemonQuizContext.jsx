@@ -106,7 +106,6 @@ export const PokemonQuizProvider = ({ children }) => {
             console.log('📦 Processing Pokemon with optimized strategy...');
 
             // Step 2: Fetch Pokemon details with limited concurrency (5 at a time)
-            const processedPokemon = [];
             const batchSize = 5;
 
             const results = await limitConcurrency(
@@ -117,11 +116,21 @@ export const PokemonQuizProvider = ({ children }) => {
                         const detailResponse = await axios.get(url);
                         const pokemon = detailResponse.data;
 
+                        // Fetch species data for Japanese name
+                        let japaneseNames = null;
+                        try {
+                            const speciesResponse = await axios.get(pokemon.species.url);
+                            japaneseNames = speciesResponse.data.names;
+                        } catch (err) {
+                            console.warn(`Could not fetch species for ${pokemon.name}`);
+                        }
+
                         // Only get essential data for quiz
                         const pokemonData = {
                             id: pokemon.id,
                             name: pokemon.name,
                             displayName: pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1),
+                            names: japaneseNames, // Store all language names
                             types: pokemon.types.map(t => t.type.name),
                             image: getBestPokemonImage(pokemon),
                             height: pokemon.height,

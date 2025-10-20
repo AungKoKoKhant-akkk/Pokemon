@@ -1,5 +1,5 @@
-import pokemon from './pokemon.png'
+import pokemon from './pokemon.png';
 
-export const assets ={
-pokemon
-}
+export const assets = {
+    pokemon
+};

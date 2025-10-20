@@ -1,14 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// Context imports
 import { useFavorites } from '../../context/FavoritesContext';
 import { useComparison } from '../../context/ComparisonContext';
 import { useTheme } from '../../context/ThemeContext';
-import { getPokemonImageFallbacks } from '../../utils/imageUtils';
+import { useLanguage } from '../../context/LanguageContext';
+
+// Utils
+import { getPokemonImageFallbacks } from '../../utils';
+
+// Styles
 import styles from './PokemonCard.module.css';
 
 const PokemonCard = ({ pokemon, index, feedback }) => {
     const navigate = useNavigate();
     const { isDark } = useTheme();
+    const { language, t, getPokemonName, getTypeName } = useLanguage();
     const { isFavorite, addToFavorites, removeFromFavorites } = useFavorites();
     const {
         addToComparison,
@@ -16,6 +24,16 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
         isInComparison,
         canAddMore
     } = useComparison();
+
+    // Helper function to get localized Pokemon name
+    const getLocalizedPokemonName = (pokemon) => {
+        if (!pokemon.names || pokemon.names.length === 0) {
+            return pokemon.name; // Fallback to English name
+        }
+
+        const nameEntry = pokemon.names.find(n => n.language.name === language);
+        return nameEntry ? nameEntry.name : pokemon.name;
+    };
 
     const handleFavoriteToggle = (pokemon, e) => {
         e.preventDefault();
@@ -81,17 +99,17 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                             </span>
                         )}
                         <h5 className={`card-title text-capitalize ${styles.cardName}`}>
-                            {pokemon.name}
+                            {getLocalizedPokemonName(pokemon)}
                         </h5>
                     </div>
 
                     {/* Type Badges */}
-                    {(pokemon.types || pokemon.type) && (
+                    {(pokemon.pokemonTypes || pokemon.type) && (
                         <div className={styles.typeBadges}>
-                            {pokemon.types ? (
-                                pokemon.types.map(type => (
+                            {pokemon.pokemonTypes ? (
+                                pokemon.pokemonTypes.map(type => (
                                     <span key={type} className={`badge ${styles.typeBadge} ${styles[`type${type.charAt(0).toUpperCase() + type.slice(1)}`]}`}>
-                                        {type}
+                                        {getTypeName(type)}
                                     </span>
                                 ))
                             ) : (
@@ -146,7 +164,7 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                             onClick={() => navigate(`/pokemon/${pokemon.name.toLowerCase()}`)}
                         >
                             <i className="bi bi-eye me-2"></i>
-                            View Details
+                            {t('viewDetails')}
                         </button>
 
                         {/* Secondary Actions */}
@@ -161,10 +179,10 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                                 onClick={(e) => handleComparisonToggle(pokemon, e)}
                                 title={
                                     isInComparison(pokemon.name)
-                                        ? 'Remove from comparison'
+                                        ? t('removeFromComparison')
                                         : canAddMore()
-                                            ? 'Add to comparison'
-                                            : 'Comparison limit reached'
+                                            ? t('addToComparison')
+                                            : t('comparisonLimitReached')
                                 }
                                 disabled={!isInComparison(pokemon.name) && !canAddMore()}
                             >
@@ -173,7 +191,7 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                                     : 'bi-bar-chart'
                                     }`}></i>
                                 <span className={`d-none d-md-inline ms-1 ${styles.buttonText}`}>
-                                    {isInComparison(pokemon.name) ? 'Comparing' : 'Compare'}
+                                    {isInComparison(pokemon.name) ? t('comparing') : t('compare')}
                                 </span>
                             </button>
 
@@ -183,14 +201,14 @@ const PokemonCard = ({ pokemon, index, feedback }) => {
                                     : 'btn-outline-secondary'
                                     }`}
                                 onClick={(e) => handleFavoriteToggle(pokemon, e)}
-                                title={isFavorite(pokemon.name) ? 'Remove from favorites' : 'Add to favorites'}
+                                title={isFavorite(pokemon.name) ? t('removeFromFavorites') : t('addToFavorites')}
                             >
                                 <i className={`bi ${isFavorite(pokemon.name)
                                     ? 'bi-heart-fill'
                                     : 'bi-heart'
                                     }`}></i>
                                 <span className={`d-none d-md-inline ms-1 ${styles.buttonText}`}>
-                                    {isFavorite(pokemon.name) ? 'Favorited' : 'Favorite'}
+                                    {isFavorite(pokemon.name) ? t('favorited') : t('favorite')}
                                 </span>
                             </button>
                         </div>

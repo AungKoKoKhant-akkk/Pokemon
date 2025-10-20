@@ -1,5 +1,10 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
+
+// Hooks
 import { useLocalStorage } from '../hooks';
+
+// Constants  
+import { STORAGE_KEYS, THEMES } from '../constants';
 
 const ThemeContext = createContext();
 
@@ -13,7 +18,7 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
     // Use custom hook for theme persistence
-    const [theme, setTheme] = useLocalStorage('pokemon-app-theme', 'light');
+    const [theme, setTheme] = useLocalStorage(STORAGE_KEYS.THEME, THEMES.LIGHT);
 
     // Update document class when theme changes
     useEffect(() => {
@@ -32,17 +37,17 @@ export const ThemeProvider = ({ children }) => {
     }, []);
 
     const toggleTheme = () => {
-        setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+        setTheme(prevTheme => prevTheme === THEMES.LIGHT ? THEMES.DARK : THEMES.LIGHT);
     };
 
-    const isDark = theme === 'dark';
+    const isDark = theme === THEMES.DARK;
 
     const value = {
         theme,
         setTheme,
         toggleTheme,
         isDark,
-        isLight: theme === 'light'
+        isLight: theme === THEMES.LIGHT
     };
 
     return (

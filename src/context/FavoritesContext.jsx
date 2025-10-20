@@ -53,6 +53,7 @@ export const FavoritesProvider = ({ children }) => {
                 description: pokemon.description,
                 pokemonTypes: pokemon.pokemonTypes || [],
                 url: pokemon.url,
+                names: pokemon.names || [], // Store multilingual names
                 addedAt: new Date().toISOString()
             };
             setFavorites(prev => [...prev, favoriteData]);

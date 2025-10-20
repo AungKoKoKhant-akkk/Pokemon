@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useSearch } from '../../context/SearchContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useComparison } from '../../context/ComparisonContext';
 import { usePokemonData } from '../../context/PokemonDataContext';
-import { getPokemonTypeColor } from '../../utils';
 import { useLocalStorageObject, useMultipleFeedback } from '../../hooks';
 import Pagination from "../Pagination/Pagination.jsx";
 import PokemonCard from './PokemonCard';
@@ -13,7 +11,6 @@ import { CARDS_PER_PAGE_OPTIONS, DEFAULT_CARDS_PER_PAGE, DEFAULT_PAGE } from '..
 
 
 const PokemonGrid = () => {
-    const navigate = useNavigate();
     const { searchTerm } = useSearch();
     const { favoritesCount } = useFavorites();
     const { getComparisonCount } = useComparison();

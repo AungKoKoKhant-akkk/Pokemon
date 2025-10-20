@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useComparison } from '../../context/ComparisonContext';
 import { usePokemonData } from '../../context/PokemonDataContext';
 import { useTheme } from '../../context/ThemeContext';
-import { getPokemonStatColor, getTotalStats, getAverageStats } from '../../utils';
+import { useLanguage } from '../../context/LanguageContext';
+import { getTotalStats, getAverageStats } from '../../utils';
 import { Link } from 'react-router-dom';
 import '../../styles/ComparisonStyles.css';
 
 const PokemonComparison = () => {
     const { comparisonList, removeFromComparison, clearComparison, getComparisonCount } = useComparison();
-    const { getPokemonDetails } = usePokemonData();
+    const { getPokemonDetails, getPokemonSpecies } = usePokemonData();
     const { isDark } = useTheme();
+    const { t, getTypeName, getPokemonName, language } = useLanguage();
     const [pokemonDetails, setPokemonDetails] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -26,31 +28,19 @@ const PokemonComparison = () => {
         setLoading(true);
         setError(null);
         try {
-            const promises = comparisonList.map(pokemon =>
-                getPokemonDetails(pokemon.name.toLowerCase())
-            );
+            const promises = comparisonList.map(async pokemon => {
+                const details = await getPokemonDetails(pokemon.name.toLowerCase());
+                const species = await getPokemonSpecies(pokemon.name.toLowerCase());
+                return { ...details, species };
+            });
             const details = await Promise.all(promises);
             const validDetails = details.filter(detail => detail !== null);
             setPokemonDetails(validDetails);
-        } catch (err) {
+        } catch (error) {
             setError('Failed to fetch Pokemon details');
         } finally {
             setLoading(false);
         }
-    };
-
-    const getStatColor = getPokemonStatColor;
-
-    const getMaxStatValue = (statName) => {
-        if (pokemonDetails.length === 0) return 100;
-        return Math.max(...pokemonDetails.map(pokemon =>
-            pokemon.stats.find(stat => stat.stat.name === statName)?.base_stat || 0
-        ));
-    };
-
-    const calculateStatPercentage = (value, statName) => {
-        const maxValue = getMaxStatValue(statName);
-        return Math.max((value / maxValue) * 100, 5); // Minimum 5% for visibility
     };
 
     if (comparisonList.length === 0) {
@@ -61,14 +51,13 @@ const PokemonComparison = () => {
                         <div className="col-lg-8">
                             <div className="empty-comparison">
                                 <i className="bi bi-bar-chart" style={{ fontSize: '5rem' }}></i>
-                                <h2>Pokemon Comparison Tool</h2>
+                                <h2>{t('comparison_title')}</h2>
                                 <p>
-                                    Select Pokemon from the main page to compare their stats, abilities, and characteristics side by side.
-                                    You can compare up to 3 Pokemon at once!
+                                    {t('comparison_select')}
                                 </p>
                                 <Link to="/" className="btn btn-pokemon-compare btn-lg mt-3">
                                     <i className="bi bi-arrow-left me-2"></i>
-                                    Browse Pokemon
+                                    {t('nav_home')}
                                 </Link>
                             </div>
                         </div>
@@ -86,7 +75,7 @@ const PokemonComparison = () => {
                         <div className="spinner-border text-primary" role="status">
                             <span className="visually-hidden">Loading...</span>
                         </div>
-                        <p className="mt-3">Loading Pokemon details...</p>
+                        <p className="mt-3">{t('msg_loading')}</p>
                     </div>
                 </div>
             </div>
@@ -103,7 +92,7 @@ const PokemonComparison = () => {
                             {error}
                         </div>
                         <button className="btn btn-primary" onClick={fetchPokemonDetails}>
-                            Try Again
+                            {t('comparison_try_again') || 'Try Again'}
                         </button>
                     </div>
                 </div>
@@ -117,36 +106,36 @@ const PokemonComparison = () => {
                 <div className="comparison-header">
                     <h1>
                         <i className="bi bi-bar-chart me-3"></i>
-                        Pokemon Comparison
+                        {t('comparison_title')}
                     </h1>
-                    <p>Analyzing {pokemonDetails.length} Pokemon side by side</p>
+                    <p>{t('comparison_analyzing') || `Analyzing ${pokemonDetails.length} Pokemon side by side`}</p>
                     <div className="comparison-counter">
-                        {getComparisonCount()}/3 Pokemon Selected
+                        {getComparisonCount()}/3 {t('comparison_selected') || 'Pokemon Selected'}
                     </div>
                 </div>
 
                 <div className="comparison-actions">
                     <Link to="/" className="btn btn-pokemon-compare">
                         <i className="bi bi-plus me-2"></i>
-                        Add More Pokemon
+                        {t('comparison_add_more') || 'Add More Pokemon'}
                     </Link>
                     <button
                         className="btn btn-outline-danger"
                         onClick={clearComparison}
                     >
                         <i className="bi bi-trash me-2"></i>
-                        Clear All
+                        {t('action_clear_all')}
                     </button>
                 </div>
 
                 {/* Pokemon Overview Cards */}
                 <div className="row mb-5">
-                    {pokemonDetails.map((pokemon, index) => (
+                    {pokemonDetails.map((pokemon) => (
                         <div key={pokemon.id} className={`col-lg-${12 / pokemonDetails.length} col-md-6 mb-3`}>
                             <div className="card h-100 border-0 shadow-sm">
                                 <div className="card-header bg-primary text-white text-center">
                                     <h5 className="mb-0 text-capitalize">
-                                        {pokemon.name}
+                                        {getPokemonName(pokemon, pokemon.species)}
                                         <button
                                             className="btn btn-sm btn-outline-light ms-2"
                                             onClick={() => removeFromComparison(pokemon.name)}
@@ -165,33 +154,33 @@ const PokemonComparison = () => {
                                     />
                                     <div className="row">
                                         <div className="col-6">
-                                            <h6 className="text-muted mb-1">Height</h6>
+                                            <h6 className="text-muted mb-1">{t('detail_height')}</h6>
                                             <p className="mb-0">{pokemon.height / 10} m</p>
                                         </div>
                                         <div className="col-6">
-                                            <h6 className="text-muted mb-1">Weight</h6>
+                                            <h6 className="text-muted mb-1">{t('detail_weight')}</h6>
                                             <p className="mb-0">{pokemon.weight / 10} kg</p>
                                         </div>
                                     </div>
                                     <div className="row mt-2">
                                         <div className="col-6">
-                                            <h6 className="text-muted mb-1">Total Stats</h6>
+                                            <h6 className="text-muted mb-1">{t('comparison_total_stats') || 'Total Stats'}</h6>
                                             <p className="mb-0 fw-bold">{getTotalStats(pokemon)}</p>
                                         </div>
                                         <div className="col-6">
-                                            <h6 className="text-muted mb-1">Average</h6>
+                                            <h6 className="text-muted mb-1">{t('comparison_average') || 'Average'}</h6>
                                             <p className="mb-0 fw-bold">{getAverageStats(pokemon)}</p>
                                         </div>
                                     </div>
                                     <div className="mt-3">
-                                        <h6 className="text-muted mb-2">Types</h6>
+                                        <h6 className="text-muted mb-2">{t('comparison_types') || 'Types'}</h6>
                                         <div className="d-flex justify-content-center gap-1">
                                             {pokemon.types.map((type, typeIndex) => (
                                                 <span
                                                     key={typeIndex}
                                                     className="badge bg-secondary text-capitalize"
                                                 >
-                                                    {type.type.name}
+                                                    {getTypeName(type.type.name)}
                                                 </span>
                                             ))}
                                         </div>
@@ -225,7 +214,7 @@ const PokemonComparison = () => {
                                         <div className="stats-comparison-grid">
                                             {pokemonDetails[0]?.stats.map((stat, statIndex) => {
                                                 const statValues = pokemonDetails.map(pokemon => ({
-                                                    name: pokemon.name,
+                                                    name: getPokemonName(pokemon, pokemon.species),
                                                     value: pokemon.stats[statIndex].base_stat,
                                                     pokemon: pokemon
                                                 }));
@@ -300,7 +289,7 @@ const PokemonComparison = () => {
                                                                         className="champion-avatar"
                                                                     />
                                                                     <div className="champion-details">
-                                                                        <h6 className="champion-name">{pokemon.name}</h6>
+                                                                        <h6 className="champion-name">{getPokemonName(pokemon, pokemon.species)}</h6>
                                                                         <div className="champion-total">
                                                                             Total: <strong>{total}</strong>
                                                                             {isChampion && <span className="crown">👑</span>}
@@ -341,7 +330,7 @@ const PokemonComparison = () => {
                                                                 className="summary-avatar"
                                                             />
                                                             <div className="summary-info">
-                                                                <h6>{pokemon.name}</h6>
+                                                                <h6>{getPokemonName(pokemon, pokemon.species)}</h6>
                                                                 <p>Dominates in <strong>{wins}</strong> stats</p>
                                                                 <div className="win-percentage">
                                                                     Win Rate: {Math.round((wins / 6) * 100)}%
@@ -371,7 +360,7 @@ const PokemonComparison = () => {
                             </div>
                             <div className="card-body">
                                 <div className="row">
-                                    {pokemonDetails.map((pokemon, index) => (
+                                    {pokemonDetails.map((pokemon) => (
                                         <div key={pokemon.id} className={`col-lg-${12 / pokemonDetails.length} col-md-6 mb-3`}>
                                             <h6 className="text-capitalize mb-3">{pokemon.name}</h6>
                                             {pokemon.abilities.map((ability, abilityIndex) => (
@@ -405,7 +394,7 @@ const PokemonComparison = () => {
                             </div>
                             <div className="card-body">
                                 <div className="row">
-                                    {pokemonDetails.map((pokemon, index) => {
+                                    {pokemonDetails.map((pokemon) => {
                                         // Get type effectiveness (this is a simplified version)
                                         const getTypeWeaknesses = (types) => {
                                             const typeChart = {

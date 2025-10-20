@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// Constants
+import { MAX_COMPARISON_ITEMS, STORAGE_KEYS } from '../constants';
+
 const ComparisonContext = createContext();
 
 export const useComparison = () => {
@@ -12,11 +15,10 @@ export const useComparison = () => {
 
 export const ComparisonProvider = ({ children }) => {
     const [comparisonList, setComparisonList] = useState([]);
-    const MAX_COMPARISON = 3; // Allow comparison of up to 3 Pokemon
 
     // Load comparison list from localStorage on mount
     useEffect(() => {
-        const savedComparison = localStorage.getItem('pokemonComparison');
+        const savedComparison = localStorage.getItem(STORAGE_KEYS.COMPARISON);
         if (savedComparison) {
             try {
                 const parsed = JSON.parse(savedComparison);
@@ -29,24 +31,20 @@ export const ComparisonProvider = ({ children }) => {
 
     // Save comparison list to localStorage whenever it changes
     useEffect(() => {
-        localStorage.setItem('pokemonComparison', JSON.stringify(comparisonList));
+        localStorage.setItem(STORAGE_KEYS.COMPARISON, JSON.stringify(comparisonList));
     }, [comparisonList]);
 
     const addToComparison = (pokemon) => {
-        if (comparisonList.length >= MAX_COMPARISON) {
-            return { success: false, message: `Maximum ${MAX_COMPARISON} Pokemon can be compared at once` };
+        if (comparisonList.length >= MAX_COMPARISON_ITEMS) {
+            return false; // Can't add more
         }
 
-        const isAlreadyInComparison = comparisonList.some(p => p.name === pokemon.name);
-        if (isAlreadyInComparison) {
-            return { success: false, message: `${pokemon.name} is already in comparison` };
+        if (!isInComparison(pokemon.name)) {
+            setComparisonList([...comparisonList, pokemon]);
+            return true;
         }
-
-        setComparisonList(prev => [...prev, pokemon]);
-        return { success: true, message: `${pokemon.name} added to comparison` };
-    };
-
-    const removeFromComparison = (pokemonName) => {
+        return false; // Already in comparison
+    }; const removeFromComparison = (pokemonName) => {
         setComparisonList(prev => prev.filter(pokemon => pokemon.name !== pokemonName));
         return { success: true, message: 'Pokemon removed from comparison' };
     };
@@ -61,7 +59,7 @@ export const ComparisonProvider = ({ children }) => {
     };
 
     const canAddMore = () => {
-        return comparisonList.length < MAX_COMPARISON;
+        return comparisonList.length < MAX_COMPARISON_ITEMS;
     };
 
     const getComparisonCount = () => {
@@ -76,7 +74,7 @@ export const ComparisonProvider = ({ children }) => {
         isInComparison,
         canAddMore,
         getComparisonCount,
-        MAX_COMPARISON
+        MAX_COMPARISON: MAX_COMPARISON_ITEMS
     };
 
     return (
